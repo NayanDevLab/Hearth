@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
@@ -12,12 +12,18 @@ import {
   useFonts,
 } from '@expo-google-fonts/plus-jakarta-sans';
 
+import { initDb } from '@/db';
+import { initI18n } from '@/i18n';
+import { prefs } from '@/storage/prefs';
+
 import '../src/styles/global.css';
 
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  const [loaded, error] = useFonts({
+  const [appReady, setAppReady] = useState(false);
+
+  const [fontsLoaded, fontError] = useFonts({
     PlusJakartaSans_400Regular,
     PlusJakartaSans_500Medium,
     PlusJakartaSans_600SemiBold,
@@ -26,12 +32,29 @@ export default function RootLayout() {
   });
 
   useEffect(() => {
-    if (loaded || error) {
+    async function bootstrap() {
+      try {
+        // 1. Open SQLite and run pending migrations
+        await initDb();
+        // 2. Load saved language and init i18next
+        const lang = await prefs.getLanguage();
+        await initI18n(lang);
+      } catch (e) {
+        console.error('Bootstrap error:', e);
+      } finally {
+        setAppReady(true);
+      }
+    }
+    bootstrap();
+  }, []);
+
+  useEffect(() => {
+    if ((fontsLoaded || fontError) && appReady) {
       SplashScreen.hideAsync();
     }
-  }, [loaded, error]);
+  }, [fontsLoaded, fontError, appReady]);
 
-  if (!loaded && !error) return null;
+  if ((!fontsLoaded && !fontError) || !appReady) return null;
 
   return (
     <>

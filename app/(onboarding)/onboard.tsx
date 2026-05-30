@@ -1,11 +1,12 @@
 // Onboarding — 4-screen horizontal paging flow.
 // Step dots animate width with Reanimated. Each slide is full-height, self-contained.
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Dimensions, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { router } from 'expo-router';
 
+import { useTranslation } from 'react-i18next';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -27,37 +28,7 @@ interface StepConfig {
   showSecondary?: boolean;
 }
 
-const STEPS: StepConfig[] = [
-  {
-    key: 'welcome',
-    Illus: IllusHome,
-    title: 'Welcome to Hearth',
-    body: 'The cozy way to run your household — without the group chat chaos.',
-    cta: 'Get started',
-  },
-  {
-    key: 'organize',
-    Illus: IllusOrganize,
-    title: 'Everything in one place',
-    body: 'Chores, bills, groceries, meals, and the calendar — finally in one home.',
-    cta: 'Next',
-  },
-  {
-    key: 'household',
-    Illus: IllusFamily,
-    title: 'Your whole household',
-    body: 'Invite roommates or family. Share tasks, split costs, and see who did what.',
-    cta: 'Next',
-  },
-  {
-    key: 'reminders',
-    Illus: IllusReminders,
-    title: 'Stay ahead, together',
-    body: 'Gentle reminders for rent, the trash, that vet appointment — nothing slips.',
-    cta: 'Create my household',
-    showSecondary: true,
-  },
-];
+// STEPS is computed inside the component — see useSteps() below.
 
 // ─── StepDot — single animated pill ─────────────────────────
 
@@ -111,6 +82,8 @@ function OnboardSlide({
   onNext,
   onSkip,
 }: SlideProps) {
+  const { t: tc } = useTranslation('common');
+  const { t } = useTranslation('onboarding');
   const illusSize = Math.min(SCREEN_W * 0.82, 280);
 
   return (
@@ -123,7 +96,7 @@ function OnboardSlide({
           activeOpacity={0.7}
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         >
-          <Text style={styles.skip}>Skip</Text>
+          <Text style={styles.skip}>{tc('skip')}</Text>
         </TouchableOpacity>
       </View>
 
@@ -147,7 +120,7 @@ function OnboardSlide({
           onPress={onNext}
         />
         {step.showSecondary && (
-          <Button variant="ghost" label="I already have an account" onPress={onSkip} />
+          <Button variant="ghost" label={t('slides.secondary_cta')} onPress={onSkip} />
         )}
       </View>
     </View>
@@ -156,28 +129,67 @@ function OnboardSlide({
 
 // ─── Main screen ─────────────────────────────────────────────
 
-function navigateToDashboard() {
-  router.replace('/(tabs)');
-}
-
 export default function OnboardingScreen() {
+  const { t: tc } = useTranslation('common');
+  const { t } = useTranslation('onboarding');
+
+  // Steps built from translations so they update on language switch.
+  const steps = useMemo<StepConfig[]>(
+    () => [
+      {
+        key: 'welcome',
+        Illus: IllusHome,
+        title: t('slides.welcome.title'),
+        body: t('slides.welcome.body'),
+        cta: tc('get_started'),
+      },
+      {
+        key: 'organize',
+        Illus: IllusOrganize,
+        title: t('slides.organize.title'),
+        body: t('slides.organize.body'),
+        cta: tc('next'),
+      },
+      {
+        key: 'household',
+        Illus: IllusFamily,
+        title: t('slides.household.title'),
+        body: t('slides.household.body'),
+        cta: tc('next'),
+      },
+      {
+        key: 'reminders',
+        Illus: IllusReminders,
+        title: t('slides.reminders.title'),
+        body: t('slides.reminders.body'),
+        cta: tc('next'),
+      },
+    ],
+    [t, tc]
+  );
+
+  // Total dots = 4 slides + setup screen (step 5).
+  const TOTAL_DOTS = steps.length + 1;
+
   const [currentStep, setCurrentStep] = useState(0);
   const [containerHeight, setContainerHeight] = useState(Dimensions.get('window').height);
   const listRef = useRef<FlatList<StepConfig>>(null);
   const insets = useSafeAreaInsets();
 
   const goNext = useCallback(() => {
-    if (currentStep < STEPS.length - 1) {
+    if (currentStep < steps.length - 1) {
       const next = currentStep + 1;
       listRef.current?.scrollToIndex({ index: next, animated: true });
       setCurrentStep(next);
     } else {
-      navigateToDashboard();
+      // @ts-expect-error — typed routes regenerate on expo start
+      router.push('/setup');
     }
-  }, [currentStep]);
+  }, [currentStep, steps]);
 
   const skip = useCallback(() => {
-    navigateToDashboard();
+    // @ts-expect-error — typed routes regenerate on expo start
+    router.push('/setup');
   }, []);
 
   return (
@@ -187,7 +199,7 @@ export default function OnboardingScreen() {
     >
       <FlatList
         ref={listRef}
-        data={STEPS}
+        data={steps}
         keyExtractor={(item) => item.key}
         horizontal
         pagingEnabled
@@ -202,7 +214,7 @@ export default function OnboardingScreen() {
         renderItem={({ item }) => (
           <OnboardSlide
             step={item}
-            totalSteps={STEPS.length}
+            totalSteps={TOTAL_DOTS}
             currentStep={currentStep}
             height={containerHeight}
             topInset={insets.top}

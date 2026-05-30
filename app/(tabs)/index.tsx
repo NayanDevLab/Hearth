@@ -1,9 +1,10 @@
 // Dashboard — glanceable home base: today summary, quick actions, 4 section previews.
 // Shows first-run tutorial on mount; accessible any time via the lightbulb.
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
+import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
@@ -68,58 +69,134 @@ const BILLS = [
   },
 ];
 
-// ─── Tutorial step examples ───────────────────────────────────
+// ─── Dashboard screen ─────────────────────────────────────────
 
-function TutorialExample1() {
-  return (
-    <View style={eg.row}>
-      <View style={eg.darkIcon}>
-        <Icon.home size={20} color={colors.white} />
-      </View>
-      <View style={eg.textBlock}>
-        <Text style={eg.bold}>Today · 60% done</Text>
-        <Text style={eg.sub}>See the day at a glance, every morning.</Text>
-      </View>
-    </View>
-  );
-}
+export default function DashboardScreen() {
+  const { t } = useTranslation('dashboard');
+  const { t: tc } = useTranslation('common');
+  const [tutorialVisible, setTutorialVisible] = useState(true);
+  const insets = useSafeAreaInsets();
 
-function TutorialExample2() {
-  const tiles = [
-    { icon: Icon.tasks, bg: colors.mintSoft, ink: '#2F8A5E', l: 'Task' },
-    { icon: Icon.cart, bg: colors.butterSoft, ink: '#8A6220', l: 'Item' },
-    { icon: Icon.wallet, bg: colors.primarySoft, ink: colors.primaryInk, l: 'Bill' },
-    { icon: Icon.meal, bg: colors.lilacSoft, ink: '#6A50A0', l: 'Meal' },
-  ];
-  return (
-    <View style={eg.tileRow}>
-      {tiles.map((t) => {
-        const IconComp = t.icon;
-        return (
-          <View key={t.l} style={[eg.tile, { backgroundColor: t.bg }]}>
-            <IconComp size={18} color={t.ink} />
-            <Text style={[eg.tileLabel, { color: t.ink }]}>{t.l}</Text>
+  const doneTasks = TASKS.filter((task) => task.done).length;
+
+  // Tutorial steps — built with translations so they update on language switch
+  const tutorialSteps = useMemo<TutorialStep[]>(() => {
+    const TILE_DEFS = [
+      { icon: Icon.tasks, bg: colors.mintSoft, ink: '#2F8A5E', l: t('quick_actions.task_short') },
+      { icon: Icon.cart, bg: colors.butterSoft, ink: '#8A6220', l: t('quick_actions.item_short') },
+      {
+        icon: Icon.wallet,
+        bg: colors.primarySoft,
+        ink: colors.primaryInk,
+        l: t('quick_actions.bill_short'),
+      },
+      { icon: Icon.meal, bg: colors.lilacSoft, ink: '#6A50A0', l: t('quick_actions.meal_short') },
+    ];
+    return [
+      {
+        title: t('tutorial.step1_title'),
+        body: t('tutorial.step1_body'),
+        example: (
+          <View style={eg.row}>
+            <View style={eg.darkIcon}>
+              <Icon.home size={20} color={colors.white} />
+            </View>
+            <View style={eg.textBlock}>
+              <Text style={eg.bold}>{t('tutorial.example1_today')}</Text>
+              <Text style={eg.sub}>{t('tutorial.example1_sub')}</Text>
+            </View>
           </View>
-        );
-      })}
-    </View>
-  );
-}
+        ),
+      },
+      {
+        title: t('tutorial.step2_title'),
+        body: t('tutorial.step2_body'),
+        example: (
+          <View style={eg.tileRow}>
+            {TILE_DEFS.map((tile) => {
+              const IconComp = tile.icon;
+              return (
+                <View key={tile.l} style={[eg.tile, { backgroundColor: tile.bg }]}>
+                  <IconComp size={18} color={tile.ink} />
+                  <Text style={[eg.tileLabel, { color: tile.ink }]}>{tile.l}</Text>
+                </View>
+              );
+            })}
+          </View>
+        ),
+      },
+      {
+        title: t('tutorial.step3_title'),
+        body: t('tutorial.step3_body'),
+        example: (
+          <View style={eg.row}>
+            <View style={[eg.bulbIcon, { backgroundColor: colors.primarySoft }]}>
+              <Icon.bulb size={18} color={colors.primaryInk} />
+            </View>
+            <Text style={[eg.sub, { flex: 1 }]}>
+              {t('tutorial.example3_tap')} <Text style={eg.bold}>{t('tutorial.lightbulb')}</Text>{' '}
+              {t('tutorial.example3_suffix')}
+            </Text>
+          </View>
+        ),
+      },
+    ];
+  }, [t]);
 
-function TutorialExample3() {
   return (
-    <View style={eg.row}>
-      <View style={[eg.bulbIcon, { backgroundColor: colors.primarySoft }]}>
-        <Icon.bulb size={18} color={colors.primaryInk} />
-      </View>
-      <Text style={[eg.sub, { flex: 1 }]}>
-        Tap the <Text style={eg.bold}>lightbulb</Text> any time you&apos;re not sure what something
-        does.
-      </Text>
+    <View style={[styles.container, { paddingTop: insets.top }]}>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
+        <DashHeader onBellPress={() => setTutorialVisible(true)} />
+        <TodayCard totalTasks={TASKS.length} doneTasks={doneTasks} amountDue="$84" />
+        <QuickActions />
+
+        {/* Today's chores */}
+        <SectionTitle
+          title={t('sections.todays_chores')}
+          count={t('sections.left', { n: TASKS.length - doneTasks })}
+          hint={tc('see_all')}
+        />
+        <View style={styles.section}>
+          {TASKS.map((task) => (
+            <TaskRow key={task.id} {...task} />
+          ))}
+        </View>
+
+        {/* Bills coming up */}
+        <SectionTitle title={t('sections.bills_coming')} hint={tc('see_all')} />
+        <View style={styles.section}>
+          {BILLS.map((bill) => (
+            <BillRow key={bill.id} {...bill} />
+          ))}
+        </View>
+
+        {/* Tonight's meal */}
+        <SectionTitle title={t('sections.tonights_meal')} />
+        <View style={styles.section}>
+          <MealCard />
+        </View>
+
+        {/* Shopping list */}
+        <SectionTitle title={t('sections.shopping')} hint={tc('open')} />
+        <View style={[styles.section, styles.lastSection]}>
+          <ShopPreview />
+        </View>
+      </ScrollView>
+
+      <TutorialSheet
+        steps={tutorialSteps}
+        visible={tutorialVisible}
+        onClose={() => setTutorialVisible(false)}
+      />
     </View>
   );
 }
 
+// Tutorial example component styles
 const eg = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   darkIcon: {
@@ -151,85 +228,6 @@ const eg = StyleSheet.create({
   },
   tileLabel: { fontFamily: fontFamily.bold, fontSize: 10 },
 });
-
-// ─── Dashboard screen ─────────────────────────────────────────
-
-const TUTORIAL_STEPS: TutorialStep[] = [
-  {
-    title: 'This is your home base',
-    body: 'A snapshot of what your household has going on today — chores, bills, meals, and the shopping list.',
-    example: <TutorialExample1 />,
-  },
-  {
-    title: 'Tap the quick actions',
-    body: 'Add a task, log a bill, plan a meal — all from one row. No menus to dig through.',
-    example: <TutorialExample2 />,
-  },
-  {
-    title: 'Get help on every screen',
-    body: 'Look for the lightbulb in the top corner of any feature. It explains the screen with a quick example.',
-    example: <TutorialExample3 />,
-  },
-];
-
-export default function DashboardScreen() {
-  const [tutorialVisible, setTutorialVisible] = useState(true);
-  const insets = useSafeAreaInsets();
-
-  const doneTasks = TASKS.filter((t) => t.done).length;
-
-  return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
-      <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={styles.content}
-        showsVerticalScrollIndicator={false}
-      >
-        <DashHeader onBellPress={() => setTutorialVisible(true)} />
-        <TodayCard totalTasks={TASKS.length} doneTasks={doneTasks} amountDue="$84" />
-        <QuickActions />
-
-        {/* Today's chores */}
-        <SectionTitle
-          title="Today's chores"
-          count={`${TASKS.length - doneTasks} left`}
-          hint="See all"
-        />
-        <View style={styles.section}>
-          {TASKS.map((task) => (
-            <TaskRow key={task.id} {...task} />
-          ))}
-        </View>
-
-        {/* Bills coming up */}
-        <SectionTitle title="Bills coming up" hint="See all" />
-        <View style={styles.section}>
-          {BILLS.map((bill) => (
-            <BillRow key={bill.id} {...bill} />
-          ))}
-        </View>
-
-        {/* Tonight's meal */}
-        <SectionTitle title="Tonight's meal" />
-        <View style={styles.section}>
-          <MealCard />
-        </View>
-
-        {/* Shopping list */}
-        <SectionTitle title="Shopping list" hint="Open" />
-        <View style={[styles.section, styles.lastSection]}>
-          <ShopPreview />
-        </View>
-      </ScrollView>
-
-      <TutorialSheet
-        steps={TUTORIAL_STEPS}
-        visible={tutorialVisible}
-        onClose={() => setTutorialVisible(false)}
-      />
-    </View>
-  );
-}
 
 const styles = StyleSheet.create({
   container: {

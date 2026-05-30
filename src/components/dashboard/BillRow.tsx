@@ -3,6 +3,8 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
+import { useTranslation } from 'react-i18next';
+
 import { Icon } from '@/components/icons/Icon';
 import { colors, fontFamily, fontSize, radius } from '@/theme';
 
@@ -15,6 +17,7 @@ export interface BillRowProps {
 }
 
 export function BillRow({ name, amount, dueLabel, iconColor, paid = false }: BillRowProps) {
+  const { t } = useTranslation('dashboard');
   return (
     <View style={styles.row}>
       <View style={[styles.iconBox, { backgroundColor: iconColor }]}>
@@ -29,7 +32,7 @@ export function BillRow({ name, amount, dueLabel, iconColor, paid = false }: Bil
       <View style={styles.right}>
         <Text style={styles.amount}>{amount}</Text>
         <Text style={[styles.status, { color: paid ? colors.mint : colors.rose }]}>
-          {paid ? 'Paid' : 'Due soon'}
+          {paid ? t('task.paid') : t('task.due_soon')}
         </Text>
       </View>
     </View>

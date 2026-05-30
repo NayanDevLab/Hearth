@@ -3,6 +3,8 @@
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
+import { useTranslation } from 'react-i18next';
+
 import { Icon } from '@/components/icons/Icon';
 import { Avatar } from '@/components/ui';
 import { colors, fontFamily, radius, spacing } from '@/theme';
@@ -13,13 +15,6 @@ const MEMBERS = [
   { initial: 'L', color: colors.butter },
   { initial: 'R', color: colors.lilac },
 ];
-
-function getGreeting(): string {
-  const hour = new Date().getHours();
-  if (hour < 12) return 'Good morning ☀';
-  if (hour < 17) return 'Good afternoon ☀';
-  return 'Good evening 🌙';
-}
 
 interface DashHeaderProps {
   userName?: string;
@@ -34,13 +29,19 @@ export function DashHeader({
   hasNotification = true,
   onBellPress,
 }: DashHeaderProps) {
+  const { t } = useTranslation('dashboard');
+  const hour = new Date().getHours();
+  let greeting = t('greeting_evening');
+  if (hour < 12) greeting = t('greeting_morning');
+  else if (hour < 17) greeting = t('greeting_afternoon');
+
   return (
     <View style={styles.container}>
       {/* Greeting row */}
       <View style={styles.topRow}>
         <View>
-          <Text style={styles.greeting}>{getGreeting()}</Text>
-          <Text style={styles.name}>Hi, {userName}</Text>
+          <Text style={styles.greeting}>{greeting}</Text>
+          <Text style={styles.name}>{t('hi_user', { name: userName })}</Text>
         </View>
         <View style={styles.controls}>
           <TouchableOpacity style={styles.bellBtn} activeOpacity={0.7} onPress={onBellPress}>

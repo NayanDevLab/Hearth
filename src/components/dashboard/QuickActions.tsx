@@ -1,7 +1,9 @@
 // QuickActions — 4 shortcut tiles (Add task / Add item / Log bill / Plan meal).
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+
+import { useTranslation } from 'react-i18next';
 
 import { Icon, type IconName } from '@/components/icons/Icon';
 import { colors, fontFamily, radius, spacing } from '@/theme';
@@ -14,14 +16,26 @@ interface ActionConfig {
   onPress?: () => void;
 }
 
-const ACTIONS: ActionConfig[] = [
-  { label: 'Add task', icon: 'tasks', bg: colors.mintSoft, ink: '#2F8A5E' },
-  { label: 'Add item', icon: 'cart', bg: colors.butterSoft, ink: '#8A6220' },
-  { label: 'Log bill', icon: 'wallet', bg: colors.primarySoft, ink: colors.primaryInk },
-  { label: 'Plan meal', icon: 'meal', bg: colors.lilacSoft, ink: '#6A50A0' },
+const ACTION_BASES: Omit<ActionConfig, 'label'>[] = [
+  { icon: 'tasks', bg: colors.mintSoft, ink: '#2F8A5E' },
+  { icon: 'cart', bg: colors.butterSoft, ink: '#8A6220' },
+  { icon: 'wallet', bg: colors.primarySoft, ink: colors.primaryInk },
+  { icon: 'meal', bg: colors.lilacSoft, ink: '#6A50A0' },
 ];
 
 export function QuickActions() {
+  const { t } = useTranslation('dashboard');
+
+  const actions = useMemo<ActionConfig[]>(
+    () => [
+      { ...ACTION_BASES[0], label: t('quick_actions.add_task') },
+      { ...ACTION_BASES[1], label: t('quick_actions.add_item') },
+      { ...ACTION_BASES[2], label: t('quick_actions.log_bill') },
+      { ...ACTION_BASES[3], label: t('quick_actions.plan_meal') },
+    ],
+    [t]
+  );
+
   return (
     <ScrollView
       horizontal
@@ -29,7 +43,7 @@ export function QuickActions() {
       contentContainerStyle={styles.row}
       style={styles.scroll}
     >
-      {ACTIONS.map((action) => {
+      {actions.map((action) => {
         const IconComp = Icon[action.icon];
         return (
           <TouchableOpacity

@@ -5,15 +5,16 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import { LinearGradient } from 'expo-linear-gradient';
 
+import { useTranslation } from 'react-i18next';
 import Svg, { Circle } from 'react-native-svg';
 
 import { colors, fontFamily, fontSize, spacing } from '@/theme';
 
-function formatTodayLabel(): string {
+function shortDay(): string {
   const now = new Date();
   const weekday = now.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase();
   const month = now.toLocaleDateString('en-US', { month: 'short' }).toUpperCase();
-  return `TODAY · ${weekday} ${month} ${now.getDate()}`;
+  return `${weekday} ${month} ${now.getDate()}`;
 }
 
 interface TodayCardProps {
@@ -23,6 +24,7 @@ interface TodayCardProps {
 }
 
 export function TodayCard({ totalTasks = 4, doneTasks = 2, amountDue = '$84' }: TodayCardProps) {
+  const { t } = useTranslation('dashboard');
   const toGo = totalTasks - doneTasks;
   const pct = totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0;
 
@@ -46,10 +48,8 @@ export function TodayCard({ totalTasks = 4, doneTasks = 2, amountDue = '$84' }: 
         />
       </Svg>
 
-      <Text style={styles.dateLabel}>{formatTodayLabel()}</Text>
-      <Text style={styles.summary}>
-        {totalTasks} things on the list.{'\n'}You&apos;re {pct}% done.
-      </Text>
+      <Text style={styles.dateLabel}>{t('today_card.date_label', { day: shortDay() })}</Text>
+      <Text style={styles.summary}>{t('today_card.summary', { total: totalTasks, pct })}</Text>
 
       {/* Progress track */}
       <View style={styles.track}>
@@ -63,9 +63,9 @@ export function TodayCard({ totalTasks = 4, doneTasks = 2, amountDue = '$84' }: 
 
       {/* Stats row */}
       <View style={styles.stats}>
-        <Stat value={String(doneTasks)} label="done" />
-        <Stat value={String(toGo)} label="to go" />
-        <Stat value={amountDue} label="due" highlight />
+        <Stat value={String(doneTasks)} label={t('today_card.done')} />
+        <Stat value={String(toGo)} label={t('today_card.to_go')} />
+        <Stat value={amountDue} label={t('today_card.due')} highlight />
       </View>
     </LinearGradient>
   );

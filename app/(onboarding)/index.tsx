@@ -7,6 +7,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 
+import { useTranslation } from 'react-i18next';
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -29,6 +30,7 @@ const TIMING = {
 } as const;
 
 export default function SplashScreen() {
+  const { t } = useTranslation('common');
   const [trackWidth, setTrackWidth] = useState(0);
 
   // Logo
@@ -89,9 +91,15 @@ export default function SplashScreen() {
     // Progress bar fade in + fill
     barOpacity.value = withDelay(TIMING.barDelay, withTiming(1, { duration: 300 }));
 
-    // Navigate after total duration
-    const timer = setTimeout(() => {
-      router.replace('/onboard');
+    // Navigate after total duration — skip onboarding for returning users
+    const timer = setTimeout(async () => {
+      const done = await import('@/storage/prefs').then((m) => m.prefs.getOnboardingComplete());
+      if (done) {
+        router.replace('/(tabs)');
+      } else {
+        // @ts-expect-error — typed routes regenerate on expo start
+        router.replace('/language');
+      }
     }, TIMING.navigate);
 
     return () => clearTimeout(timer);
@@ -148,8 +156,8 @@ export default function SplashScreen() {
 
         {/* Title + tagline */}
         <Animated.View style={[styles.textBlock, textStyle]}>
-          <Text style={styles.title}>Hearth</Text>
-          <Text style={styles.tagline}>Your home, in sync.</Text>
+          <Text style={styles.title}>{t('app_name')}</Text>
+          <Text style={styles.tagline}>{t('tagline')}</Text>
         </Animated.View>
       </View>
 
@@ -158,7 +166,7 @@ export default function SplashScreen() {
         <View style={styles.track} onLayout={(e) => setTrackWidth(e.nativeEvent.layout.width)}>
           <Animated.View style={[styles.fill, barFillStyle]} />
         </View>
-        <Text style={styles.loadingLabel}>Warming things up…</Text>
+        <Text style={styles.loadingLabel}>{t('loading')}</Text>
       </Animated.View>
     </LinearGradient>
   );

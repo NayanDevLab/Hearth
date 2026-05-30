@@ -1,0 +1,40 @@
+{
+  "language": {
+    "title": "Choose your language",
+    "subtitle": "अपनी भाषा चुनें · તmારી ભાષા પસંદ કરો",
+    "hint": "You can change this any time in Settings. More languages are on the way.",
+    "cta": "Continue"
+  },
+  "slides": {
+    "secondary_cta": "I already have an account",
+    "welcome": {
+      "title": "Welcome to Hearth",
+      "body": "The cozy way to run your household — without the group chat chaos."
+    },
+    "organize": {
+      "title": "Everything in one place",
+      "body": "Chores, bills, groceries, meals, and the calendar — finally in one home."
+    },
+    "household": {
+      "title": "Your whole household",
+      "body": "Invite roommates or family. Share tasks, split costs, and see who did what."
+    },
+    "reminders": {
+      "title": "Stay ahead, together",
+      "body": "Gentle reminders for rent, the trash, that vet appointment — nothing slips."
+    }
+  },
+  "setup": {
+    "title": "What should we call you?",
+    "subtitle": "Just a name to make Hearth feel like yours. You can change it anytime.",
+    "name_label": "Your name",
+    "name_placeholder": "e.g. Aanya",
+    "household_label": "Household name · optional",
+    "household_placeholder": "e.g. The Sharma Home",
+    "privacy_title": "Everything stays on this phone",
+    "privacy_body": "Hearth works fully offline. No account, no cloud — your household data never leaves your device.",
+    "cta_ready": "Enter Hearth, {{name}}",
+    "cta_default": "Enter Hearth",
+    "cta_skip": "Skip"
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "greeting_morning": "Good morning ☀",
+  "greeting_afternoon": "Good afternoon ☀",
+  "greeting_evening": "Good evening 🌙",
+  "hi_user": "Hi, {{name}}",
+  "today_card": {
+    "date_label": "TODAY · {{day}}",
+    "summary": "{{total}} things on the list. You're {{pct}}% done.",
+    "done": "done",
+    "to_go": "to go",
+    "due": "due"
+  },
+  "quick_actions": {
+    "add_task": "Add task",
+    "add_item": "Add item",
+    "log_bill": "Log bill",
+    "plan_meal": "Plan meal",
+    "task_short": "Task",
+    "item_short": "Item",
+    "bill_short": "Bill",
+    "meal_short": "Meal"
+  },
+  "sections": {
+    "todays_chores": "Today's chores",
+    "bills_coming": "Bills coming up",
+    "tonights_meal": "Tonight's meal",
+    "shopping": "Shopping list",
+    "left": "{{n}} left"
+  },
+  "task": {
+    "paid": "Paid",
+    "due_soon": "Due soon"
+  },
+  "tutorial": {
+    "step1_title": "This is your home base",
+    "step1_body": "A snapshot of what your household has going on today — chores, bills, meals, and the shopping list.",
+    "step2_title": "Tap the quick actions",
+    "step2_body": "Add a task, log a bill, plan a meal — all from one row. No menus to dig through.",
+    "step3_title": "Get help on every screen",
+    "step3_body": "Look for the lightbulb in the top corner of any feature. It explains the screen with a quick example.",
+    "example1_today": "Today · 60% done",
+    "example1_sub": "See the day at a glance, every morning.",
+    "example3_tap": "Tap the",
+    "lightbulb": "lightbulb",
+    "example3_suffix": "any time you're not sure what something does."
+  }
+}

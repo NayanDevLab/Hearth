@@ -17,6 +17,7 @@ module.exports = defineConfig([
       'expo-env.d.ts',
       'nativewind-env.d.ts',
       'scripts/**',
+      'design/**',
     ],
   },
 

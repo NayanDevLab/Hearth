@@ -2,21 +2,36 @@
 // Each module owns its tables; add new tables in the matching section.
 // Bump DB_VERSION and add a migration in migrations/ when changing schema.
 
-export const DB_VERSION = 1;
+export const DB_VERSION = 2;
 
 export const SQL_TABLES = {
   // ─── Tasks ────────────────────────────────────────────────
   tasks: `
     CREATE TABLE IF NOT EXISTS tasks (
-      id            TEXT PRIMARY KEY,
-      title         TEXT NOT NULL,
-      assignee      TEXT,
+      id             TEXT PRIMARY KEY,
+      title          TEXT NOT NULL,
+      assignee       TEXT,
       due_time       TEXT,
-      tag           TEXT,
-      done          INTEGER NOT NULL DEFAULT 0,
-      recurrence    TEXT,
-      created_at    TEXT NOT NULL DEFAULT (datetime('now')),
-      updated_at    TEXT NOT NULL DEFAULT (datetime('now'))
+      tag            TEXT,
+      done           INTEGER NOT NULL DEFAULT 0,
+      recurrence     TEXT,
+      recurrence_id  TEXT,
+      category       TEXT,
+      priority       TEXT NOT NULL DEFAULT 'normal',
+      notes          TEXT,
+      reminder       TEXT,
+      created_at     TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at     TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+  `,
+
+  task_completions: `
+    CREATE TABLE IF NOT EXISTS task_completions (
+      id           TEXT PRIMARY KEY,
+      task_id      TEXT NOT NULL,
+      completed_by TEXT,
+      completed_at TEXT NOT NULL DEFAULT (datetime('now')),
+      on_time      INTEGER NOT NULL DEFAULT 1
     );
   `,
 

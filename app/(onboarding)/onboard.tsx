@@ -182,13 +182,11 @@ export default function OnboardingScreen() {
       listRef.current?.scrollToIndex({ index: next, animated: true });
       setCurrentStep(next);
     } else {
-      // @ts-expect-error — typed routes regenerate on expo start
       router.push('/setup');
     }
   }, [currentStep, steps]);
 
   const skip = useCallback(() => {
-    // @ts-expect-error — typed routes regenerate on expo start
     router.push('/setup');
   }, []);
 

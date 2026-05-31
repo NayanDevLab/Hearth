@@ -11,14 +11,17 @@ import type { AppLanguage } from '@/storage/prefs';
 import enCommon from './locales/en/common.json';
 import enDashboard from './locales/en/dashboard.json';
 import enOnboarding from './locales/en/onboarding.json';
+import enTasks from './locales/en/tasks.json';
 // ─── Gujarati ────────────────────────────────────────────────
 import guCommon from './locales/gu/common.json';
 import guDashboard from './locales/gu/dashboard.json';
 import guOnboarding from './locales/gu/onboarding.json';
+import guTasks from './locales/gu/tasks.json';
 // ─── Hindi ───────────────────────────────────────────────────
 import hiCommon from './locales/hi/common.json';
 import hiDashboard from './locales/hi/dashboard.json';
 import hiOnboarding from './locales/hi/onboarding.json';
+import hiTasks from './locales/hi/tasks.json';
 
 export const SUPPORTED_LANGUAGES: AppLanguage[] = ['en', 'hi', 'gu'];
 
@@ -46,11 +49,11 @@ export async function initI18n(language: AppLanguage = 'en'): Promise<void> {
     lng: language,
     fallbackLng: 'en',
     defaultNS: 'common',
-    ns: ['common', 'onboarding', 'dashboard'],
+    ns: ['common', 'onboarding', 'dashboard', 'tasks'],
     resources: {
-      en: { common: enCommon, onboarding: enOnboarding, dashboard: enDashboard },
-      hi: { common: hiCommon, onboarding: hiOnboarding, dashboard: hiDashboard },
-      gu: { common: guCommon, onboarding: guOnboarding, dashboard: guDashboard },
+      en: { common: enCommon, onboarding: enOnboarding, dashboard: enDashboard, tasks: enTasks },
+      hi: { common: hiCommon, onboarding: hiOnboarding, dashboard: hiDashboard, tasks: hiTasks },
+      gu: { common: guCommon, onboarding: guOnboarding, dashboard: guDashboard, tasks: guTasks },
     },
     interpolation: { escapeValue: false },
     compatibilityJSON: 'v4',

@@ -97,7 +97,6 @@ export default function SplashScreen() {
       if (done) {
         router.replace('/(tabs)');
       } else {
-        // @ts-expect-error — typed routes regenerate on expo start
         router.replace('/language');
       }
     }, TIMING.navigate);

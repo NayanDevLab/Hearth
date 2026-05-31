@@ -159,7 +159,10 @@ export async function getTasksByFilter(
   }
 
   const hasMore = rows.length > pageSize;
-  const tasks = hasMore ? rows.slice(0, pageSize) : rows;
+  const tasks = (hasMore ? rows.slice(0, pageSize) : rows).map((r) => ({
+    ...r,
+    done: Boolean(r.done),
+  }));
   return { groups: groupTasks(tasks), hasMore };
 }
 

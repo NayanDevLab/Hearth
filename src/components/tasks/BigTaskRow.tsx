@@ -43,10 +43,10 @@ export function BigTaskRow({ task, onToggle, onPress }: BigTaskRowProps) {
       <TouchableOpacity
         hitSlop={{ top: 8, bottom: 8, left: 4, right: 8 }}
         onPress={() => onToggle?.(task.id, !task.done)}
-        style={[styles.checkbox, task.done && styles.checkboxDone]}
+        style={[styles.checkbox, !!task.done && styles.checkboxDone]}
         activeOpacity={0.7}
       >
-        {task.done && <Icon.check size={14} color={colors.white} stroke={2.5} />}
+        {!!task.done && <Icon.check size={14} color={colors.white} stroke={2.5} />}
       </TouchableOpacity>
 
       {/* Content */}

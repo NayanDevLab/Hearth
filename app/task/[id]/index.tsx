@@ -31,6 +31,7 @@ import {
 } from '@/db/modules/tasks';
 import { prefs } from '@/storage/prefs';
 import { colors, fontFamily, fontSize, radius, spacing } from '@/theme';
+import { formatDateWithTime, formatFullDate } from '@/utils';
 
 export default function TaskDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -99,23 +100,6 @@ export default function TaskDetailScreen() {
     await deleteTaskSeries(task.recurrence_id);
     router.back();
   };
-
-  function formatDateTime(iso?: string): string {
-    if (!iso) return '—';
-    const d = new Date(iso);
-    if (isNaN(d.getTime())) return iso;
-    return (
-      d.toLocaleDateString([], { month: 'short', day: 'numeric' }) +
-      ', ' +
-      d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    );
-  }
-
-  function formatDate(iso: string): string {
-    const d = new Date(iso);
-    if (isNaN(d.getTime())) return iso;
-    return d.toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' });
-  }
 
   const cat = task?.category ? CATEGORY_CONFIG[task.category] : null;
   const member = task?.assignee ? MEMBER_CONFIG[task.assignee] : null;
@@ -210,7 +194,7 @@ export default function TaskDetailScreen() {
           <Text style={styles.title}>{task.title}</Text>
           {member && (
             <Text style={styles.createdBy}>
-              {t('created_by', { name: member.name, date: formatDate(task.created_at) })}
+              {t('created_by', { name: member.name, date: formatFullDate(task.created_at) })}
             </Text>
           )}
         </View>
@@ -248,7 +232,7 @@ export default function TaskDetailScreen() {
           <DetailRow
             icon={<Icon.calendar size={18} color={colors.ink3} />}
             label={t('due')}
-            value={task.due_time ? formatDateTime(task.due_time) : '—'}
+            value={task.due_time ? formatDateWithTime(task.due_time) : '—'}
           />
           <DetailRow
             icon={<Icon.sparkle size={18} color={colors.ink3} />}
@@ -295,7 +279,7 @@ export default function TaskDetailScreen() {
                     )}
                     <View style={styles.historyContent}>
                       <Text style={styles.historyName}>{m2?.name ?? '—'}</Text>
-                      <Text style={styles.historyDate}>{formatDate(h.completed_at)}</Text>
+                      <Text style={styles.historyDate}>{formatFullDate(h.completed_at)}</Text>
                     </View>
                     <View
                       style={[

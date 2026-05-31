@@ -1,9 +1,9 @@
 // Shopping list detail — items grouped by category with check-off, quick-add, filter.
 
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { ActivityIndicator, SectionList, StyleSheet, View } from 'react-native';
 
-import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -30,6 +30,7 @@ import {
   type ShoppingList,
   toggleItem,
 } from '@/db/modules/shopping';
+import { useFocusRefresh } from '@/hooks';
 import { colors } from '@/theme';
 
 export default function ListDetailScreen() {
@@ -45,8 +46,6 @@ export default function ListDetailScreen() {
 
   const [deleteTarget, setDeleteTarget] = useState<ShoppingItem | null>(null);
 
-  const hasFocused = useRef(false);
-
   const loadData = useCallback(async () => {
     if (!id) return;
     try {
@@ -60,16 +59,7 @@ export default function ListDetailScreen() {
     }
   }, [id]);
 
-  useFocusEffect(
-    useCallback(() => {
-      if (!hasFocused.current) {
-        hasFocused.current = true;
-        loadData();
-      } else {
-        loadData();
-      }
-    }, [loadData])
-  );
+  useFocusRefresh(loadData, loadData);
 
   const handleToggle = useCallback(async (itemId: string, done: boolean) => {
     setItems((prev) => prev.map((i) => (i.id === itemId ? { ...i, done } : i)));

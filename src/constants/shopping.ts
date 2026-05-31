@@ -1,5 +1,8 @@
 // Shopping constants — categories, units, list icons, keyword auto-detection.
 
+// ─── Shared form types ───────────────────────────────────────
+// Both new-item and edit-item forms use the same shape.
+import { type ShoppingItem } from '@/db/modules/shopping';
 import { colors } from '@/theme';
 
 export interface ShoppingCategory {
@@ -261,6 +264,42 @@ export const LIST_ICON_OPTIONS = [
   { emoji: '🐾', color: '#6A50A0', soft: colors.lilacSoft },
   { emoji: '🎉', color: colors.sky, soft: colors.skySoft },
 ];
+
+export interface ShoppingFormFields {
+  name: string;
+  quantity: number;
+  unit: ShoppingUnit;
+  category: string;
+  assignee: string | null;
+  brand: string;
+  note: string;
+  urgent: boolean;
+}
+
+export const INITIAL_SHOPPING_FORM: ShoppingFormFields = {
+  name: '',
+  quantity: 1,
+  unit: 'ea',
+  category: '',
+  assignee: null,
+  brand: '',
+  note: '',
+  urgent: false,
+};
+
+/** Convert a DB row into form fields for the edit screen. */
+export function itemToForm(item: ShoppingItem): ShoppingFormFields {
+  return {
+    name: item.name,
+    quantity: item.quantity,
+    unit: (item.unit ?? 'ea') as ShoppingUnit,
+    category: item.category ?? '',
+    assignee: item.assignee ?? null,
+    brand: item.brand ?? '',
+    note: item.note ?? '',
+    urgent: item.urgent,
+  };
+}
 
 // Parse "2 lemons" → { qty: 2, name: "lemons" }
 export function parseQuickAdd(raw: string): { name: string; quantity: number; unit: ShoppingUnit } {

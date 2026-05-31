@@ -1,4 +1,4 @@
-// New task screen — keyboard-aware form. Saves to SQLite on "Create task".
+// New task — uses shared FormField, FormBottomBar, MemberSelector, PickerRow, SimplePickerSheet.
 
 import React, { useState } from 'react';
 import {
@@ -21,22 +21,25 @@ import DateTimePicker, {
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { FormBottomBar, FormField, PickerRow, SimplePickerSheet } from '@/components/forms';
 import { Icon } from '@/components/icons/Icon';
-import { Avatar, Button, ScreenHeader } from '@/components/ui';
+import { MemberSelector, ScreenHeader } from '@/components/ui';
 import {
   CATEGORIES,
-  HOUSEHOLD_MEMBERS,
+  getPriorityOptions,
   REMINDER_OPTIONS,
   REPEAT_OPTIONS,
   repeatTagLabel,
 } from '@/constants/tasks';
 import { insertTask, type TaskPriority, type TaskRecurrence } from '@/db/modules/tasks';
 import { colors, fontFamily, fontSize, radius, spacing } from '@/theme';
+import { formatPickerLabel } from '@/utils';
 
 export default function NewTaskScreen() {
   const { t } = useTranslation('tasks');
   const { t: tc } = useTranslation('common');
   const insets = useSafeAreaInsets();
+
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState<string | null>(null);
   const [assignee, setAssignee] = useState<string | null>(null);
@@ -51,9 +54,12 @@ export default function NewTaskScreen() {
   const [saving, setSaving] = useState(false);
 
   const isValid = title.trim().length > 0;
+  const priorityOpts = getPriorityOptions(t);
+  const repeatLabel =
+    REPEAT_OPTIONS.find((r) => r.value === recurrence)?.label ?? t('repeats_never');
+  const reminderLabel =
+    REMINDER_OPTIONS.find((r) => r.value === reminder)?.label ?? t('reminder_none');
 
-  // Android: imperative dialog API (avoids the dismiss-on-unmount crash).
-  // iOS: toggle showDatePicker to render the inline spinner component.
   function openDatePicker() {
     if (Platform.OS !== 'android') {
       setShowDatePicker(true);
@@ -65,7 +71,6 @@ export default function NewTaskScreen() {
       mode: 'date',
       onChange: (_ev, selectedDate) => {
         if (!selectedDate) return;
-        // Chain into time picker after date is confirmed
         DateTimePickerAndroid.open({
           value: selectedDate,
           mode: 'time',
@@ -78,7 +83,7 @@ export default function NewTaskScreen() {
     });
   }
 
-  const handleCreate = async () => {
+  async function handleCreate() {
     if (!isValid || saving) return;
     setSaving(true);
     try {
@@ -103,22 +108,11 @@ export default function NewTaskScreen() {
       });
       router.back();
     } catch {
-      // TODO: show toast
+      /* TODO: toast */
     } finally {
       setSaving(false);
     }
-  };
-
-  const PRIORITY_OPTS: { value: TaskPriority; label: string; color: string; soft: string }[] = [
-    { value: 'low', label: t('priority_low'), color: colors.ink3, soft: colors.surface2 },
-    { value: 'normal', label: t('priority_normal'), color: colors.sky, soft: colors.skySoft },
-    { value: 'high', label: t('priority_high'), color: colors.rose, soft: colors.roseSoft },
-  ];
-
-  const repeatLabel =
-    REPEAT_OPTIONS.find((r) => r.value === recurrence)?.label ?? t('repeats_never');
-  const reminderLabel =
-    REMINDER_OPTIONS.find((r) => r.value === reminder)?.label ?? t('reminder_none');
+  }
 
   return (
     <KeyboardAvoidingView
@@ -134,9 +128,7 @@ export default function NewTaskScreen() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          {/* Title */}
-          <View style={styles.fieldGroup}>
-            <Text style={styles.fieldLabel}>{t('what_label').toUpperCase()}</Text>
+          <FormField label={t('what_label')}>
             <TextInput
               style={[styles.titleInput, title.length > 0 && styles.inputFilled]}
               placeholder={t('what_placeholder')}
@@ -147,11 +139,9 @@ export default function NewTaskScreen() {
               returnKeyType="next"
               autoCapitalize="sentences"
             />
-          </View>
+          </FormField>
 
-          {/* Category */}
-          <View style={styles.fieldGroup}>
-            <Text style={styles.fieldLabel}>{t('category_label').toUpperCase()}</Text>
+          <FormField label={t('category_label')}>
             <View style={styles.chips}>
               {CATEGORIES.map((c) => {
                 const active = category === c.id;
@@ -171,57 +161,17 @@ export default function NewTaskScreen() {
                 );
               })}
             </View>
-          </View>
+          </FormField>
 
-          {/* Assign to */}
-          <View style={styles.fieldGroup}>
-            <Text style={styles.fieldLabel}>{t('assign_label').toUpperCase()}</Text>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              style={styles.memberScroll}
-            >
-              <View style={styles.memberRow}>
-                {HOUSEHOLD_MEMBERS.map((m) => {
-                  const selected = assignee === m.initial;
-                  return (
-                    <TouchableOpacity
-                      key={m.initial}
-                      style={[styles.memberTile, selected && styles.memberTileSelected]}
-                      activeOpacity={0.75}
-                      onPress={() => setAssignee(selected ? null : m.initial)}
-                    >
-                      <View style={styles.memberAvatarWrap}>
-                        <Avatar initial={m.initial} color={m.color} size={44} />
-                        {selected && (
-                          <View style={styles.memberCheck}>
-                            <Icon.check size={10} color={colors.white} stroke={3} />
-                          </View>
-                        )}
-                      </View>
-                      <Text style={[styles.memberName, selected && styles.memberNameSelected]}>
-                        {m.name}
-                      </Text>
-                    </TouchableOpacity>
-                  );
-                })}
-              </View>
-            </ScrollView>
-          </View>
+          <FormField label={t('assign_label')}>
+            <MemberSelector selected={assignee} onChange={setAssignee} anyoneLabel={tc('done')} />
+          </FormField>
 
-          {/* When */}
-          <View style={styles.fieldGroup}>
-            <Text style={styles.fieldLabel}>{t('when_label').toUpperCase()}</Text>
+          <FormField label={t('when_label')}>
             <PickerRow
               icon={<Icon.calendar size={18} color={colors.ink3} />}
               label={t('due')}
-              value={
-                dueDate
-                  ? dueDate.toLocaleDateString([], { month: 'short', day: 'numeric' }) +
-                    ' · ' +
-                    dueDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-                  : t('due_placeholder')
-              }
+              value={dueDate ? formatPickerLabel(dueDate) : t('due_placeholder')}
               subtle={!dueDate}
               onPress={openDatePicker}
             />
@@ -239,13 +189,11 @@ export default function NewTaskScreen() {
               subtle={reminder === null}
               onPress={() => setShowReminderPicker(true)}
             />
-          </View>
+          </FormField>
 
-          {/* Priority */}
-          <View style={styles.fieldGroup}>
-            <Text style={styles.fieldLabel}>{t('priority_label').toUpperCase()}</Text>
+          <FormField label={t('priority_label')}>
             <View style={styles.priorityRow}>
-              {PRIORITY_OPTS.map((p) => {
+              {priorityOpts.map((p) => {
                 const active = priority === p.value;
                 return (
                   <TouchableOpacity
@@ -266,11 +214,9 @@ export default function NewTaskScreen() {
                 );
               })}
             </View>
-          </View>
+          </FormField>
 
-          {/* Notes */}
-          <View style={[styles.fieldGroup, styles.lastField]}>
-            <Text style={styles.fieldLabel}>{t('notes_label').toUpperCase()}</Text>
+          <FormField label={t('notes_label')} style={styles.lastField}>
             <TextInput
               style={[styles.notesInput, notes.length > 0 && styles.inputFilled]}
               placeholder={t('notes_placeholder')}
@@ -281,29 +227,18 @@ export default function NewTaskScreen() {
               numberOfLines={3}
               textAlignVertical="top"
             />
-          </View>
+          </FormField>
         </ScrollView>
 
-        {/* Bottom CTA */}
-        <View style={[styles.bottomBar, { paddingBottom: Math.max(insets.bottom, 16) + 4 }]}>
-          <Button
-            variant="soft"
-            label={tc('cancel')}
-            onPress={() => router.back()}
-            fullWidth={false}
-            style={styles.cancelBtn}
-          />
-          <Button
-            variant="accent"
-            label={t('create')}
-            loading={saving}
-            disabled={!isValid}
-            onPress={handleCreate}
-            style={styles.createBtn}
-          />
-        </View>
+        <FormBottomBar
+          onCancel={() => router.back()}
+          onSubmit={handleCreate}
+          submitLabel={t('create')}
+          cancelLabel={tc('cancel')}
+          loading={saving}
+          disabled={!isValid}
+        />
 
-        {/* iOS-only inline date+time spinner — Android uses the imperative API above */}
         {Platform.OS === 'ios' && showDatePicker && (
           <DateTimePicker
             value={dueDate ?? new Date()}
@@ -316,7 +251,6 @@ export default function NewTaskScreen() {
           />
         )}
 
-        {/* Repeat picker */}
         {showRepeatPicker && (
           <SimplePickerSheet
             title={t('repeats')}
@@ -332,8 +266,6 @@ export default function NewTaskScreen() {
             onClose={() => setShowRepeatPicker(false)}
           />
         )}
-
-        {/* Reminder picker */}
         {showReminderPicker && (
           <SimplePickerSheet
             title={t('reminder')}
@@ -354,87 +286,12 @@ export default function NewTaskScreen() {
   );
 }
 
-// ─── Sub-components ───────────────────────────────────────────
-
-function PickerRow({
-  icon,
-  label,
-  value,
-  subtle,
-  onPress,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-  subtle?: boolean;
-  onPress: () => void;
-}) {
-  return (
-    <TouchableOpacity style={styles.pickerRow} activeOpacity={0.7} onPress={onPress}>
-      <View style={styles.pickerIcon}>{icon}</View>
-      <View style={styles.pickerText}>
-        <Text style={styles.pickerLabel}>{label}</Text>
-        <Text style={[styles.pickerValue, subtle && styles.pickerValueSubtle]}>{value}</Text>
-      </View>
-      <Icon.arrow size={16} color={colors.ink4} />
-    </TouchableOpacity>
-  );
-}
-
-function SimplePickerSheet({
-  title,
-  options,
-  selected,
-  onSelect,
-  onClose,
-}: {
-  title: string;
-  options: { value: string | null; label: string }[];
-  selected: string | null;
-  onSelect: (v: string | null) => void;
-  onClose: () => void;
-}) {
-  return (
-    <View style={styles.pickerSheet}>
-      <View style={styles.pickerSheetHandle} />
-      <Text style={styles.pickerSheetTitle}>{title}</Text>
-      {options.map((o) => {
-        const active = selected === o.value;
-        return (
-          <TouchableOpacity
-            key={String(o.value)}
-            style={[styles.pickerOption, active && styles.pickerOptionActive]}
-            activeOpacity={0.75}
-            onPress={() => onSelect(o.value)}
-          >
-            <Text style={[styles.pickerOptionLabel, active && styles.pickerOptionLabelActive]}>
-              {o.label}
-            </Text>
-            {active && <Icon.check size={16} color={colors.primary} stroke={2.5} />}
-          </TouchableOpacity>
-        );
-      })}
-      <TouchableOpacity style={styles.pickerClose} onPress={onClose}>
-        <Text style={styles.pickerCloseLabel}>Cancel</Text>
-      </TouchableOpacity>
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
   flex: { flex: 1 },
   container: { flex: 1, backgroundColor: colors.bg },
   scroll: { flex: 1 },
   content: { paddingHorizontal: spacing[7], paddingBottom: 20 },
-  fieldGroup: { marginBottom: 20 },
   lastField: { marginBottom: 8 },
-  fieldLabel: {
-    fontFamily: fontFamily.bold,
-    fontSize: fontSize.caption,
-    color: colors.ink3,
-    letterSpacing: 0.66,
-    marginBottom: 10,
-  },
   titleInput: {
     backgroundColor: colors.white,
     borderWidth: 1.5,
@@ -461,59 +318,6 @@ const styles = StyleSheet.create({
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   categoryChip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: radius.pill },
   categoryChipText: { fontFamily: fontFamily.semiBold, fontSize: 13 },
-  memberScroll: { marginHorizontal: -spacing[7], paddingHorizontal: spacing[7] },
-  memberRow: { flexDirection: 'row', gap: 10, paddingVertical: 4 },
-  memberTile: {
-    alignItems: 'center',
-    gap: 6,
-    padding: '8px 6px' as unknown as number,
-    minWidth: 64,
-    borderRadius: 14,
-    paddingHorizontal: 6,
-    paddingVertical: 8,
-    borderWidth: 1,
-    borderColor: colors.transparent,
-  },
-  memberTileSelected: { backgroundColor: colors.surface2, borderColor: colors.line },
-  memberAvatarWrap: { position: 'relative' },
-  memberCheck: {
-    position: 'absolute',
-    right: -2,
-    bottom: -2,
-    width: 18,
-    height: 18,
-    borderRadius: 9,
-    backgroundColor: colors.mint,
-    borderWidth: 2,
-    borderColor: colors.white,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  memberName: { fontFamily: fontFamily.semiBold, fontSize: 11, color: colors.ink3 },
-  memberNameSelected: { color: colors.ink },
-  pickerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    padding: 14,
-    backgroundColor: colors.white,
-    borderWidth: 1,
-    borderColor: colors.line,
-    borderRadius: radius.sm,
-    marginBottom: 8,
-  },
-  pickerIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: radius.xs,
-    backgroundColor: colors.surface2,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  pickerText: { flex: 1 },
-  pickerLabel: { fontFamily: fontFamily.semiBold, fontSize: 13, color: colors.ink3 },
-  pickerValue: { fontFamily: fontFamily.semiBold, fontSize: 15, color: colors.ink, marginTop: 2 },
-  pickerValueSubtle: { color: colors.ink4 },
   priorityRow: { flexDirection: 'row', gap: 8 },
   priorityBtn: {
     flex: 1,
@@ -524,60 +328,4 @@ const styles = StyleSheet.create({
   },
   priorityBtnInactive: { backgroundColor: colors.white, borderWidth: 1, borderColor: colors.line },
   priorityLabel: { fontFamily: fontFamily.semiBold, fontSize: 14 },
-  bottomBar: {
-    flexDirection: 'row',
-    gap: 10,
-    paddingHorizontal: spacing[7],
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: colors.line,
-    backgroundColor: colors.white,
-  },
-  cancelBtn: { flex: 1, height: 52 },
-  createBtn: { flex: 1.6 },
-  pickerSheet: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: colors.white,
-    borderTopLeftRadius: radius.xl,
-    borderTopRightRadius: radius.xl,
-    padding: spacing[7],
-    paddingBottom: 32,
-  },
-  pickerSheetHandle: {
-    width: 36,
-    height: 5,
-    backgroundColor: colors.ink4,
-    opacity: 0.4,
-    borderRadius: 3,
-    alignSelf: 'center',
-    marginBottom: 16,
-  },
-  pickerSheetTitle: {
-    fontFamily: fontFamily.bold,
-    fontSize: 16,
-    color: colors.ink,
-    marginBottom: 14,
-    textAlign: 'center',
-  },
-  pickerOption: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 14,
-    paddingHorizontal: 4,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.line2,
-  },
-  pickerOptionActive: { borderBottomColor: colors.line2 },
-  pickerOptionLabel: { fontFamily: fontFamily.semiBold, fontSize: 15, color: colors.ink },
-  pickerOptionLabelActive: { color: colors.primary },
-  pickerClose: {
-    marginTop: 8,
-    paddingVertical: 14,
-    alignItems: 'center',
-  },
-  pickerCloseLabel: { fontFamily: fontFamily.semiBold, fontSize: 15, color: colors.ink3 },
 });

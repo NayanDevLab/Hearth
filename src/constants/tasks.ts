@@ -59,6 +59,21 @@ export function repeatTagLabel(
   return labels.never;
 }
 
+// getPriorityOptions — returns translated priority config for both new and edit task forms.
+// Accepts the `t` function so translations stay live when language switches.
+export function getPriorityOptions(t: (key: string) => string) {
+  return [
+    { value: 'low' as const, label: t('tasks:priority_low'), color: '#787E8B', soft: '#F5F2EC' },
+    {
+      value: 'normal' as const,
+      label: t('tasks:priority_normal'),
+      color: '#4AADD1',
+      soft: '#E0F1F8',
+    },
+    { value: 'high' as const, label: t('tasks:priority_high'), color: '#E55A48', soft: '#FAE5E2' },
+  ];
+}
+
 export const REMINDER_OPTIONS = [
   { value: null, label: 'None' },
   { value: '15min', label: '15 min before' },

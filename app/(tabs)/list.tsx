@@ -1,6 +1,6 @@
 // Shopping lists home — multiple lists per household with progress tracking.
 
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import {
   Modal,
   RefreshControl,
@@ -12,7 +12,7 @@ import {
   View,
 } from 'react-native';
 
-import { router, useFocusEffect } from 'expo-router';
+import { router } from 'expo-router';
 
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -23,6 +23,7 @@ import { ShoppingListCard } from '@/components/shopping';
 import { FAB, ScreenHeader, TutorialSheet, type TutorialStep } from '@/components/ui';
 import { LIST_ICON_OPTIONS } from '@/constants/shopping';
 import { getAllLists, getListStats, insertList, type ShoppingList } from '@/db/modules/shopping';
+import { useFocusRefresh } from '@/hooks';
 import { colors, fontFamily, fontSize, radius, spacing } from '@/theme';
 
 interface ListWithStats extends ShoppingList {
@@ -216,8 +217,6 @@ export default function ListScreen() {
   const [tutorialVisible, setTutorialVisible] = useState(false);
   const [newListVisible, setNewListVisible] = useState(false);
 
-  const hasFocused = useRef(false);
-
   async function loadLists(isRefresh = false) {
     if (!isRefresh) setLoading(true);
     else setRefreshing(true);
@@ -239,16 +238,10 @@ export default function ListScreen() {
     }
   }
 
-  useFocusEffect(
-    useCallback(() => {
-      if (!hasFocused.current) {
-        hasFocused.current = true;
-        loadLists(false);
-      } else {
-        loadLists(true);
-      }
-    }, [])
-  );
+  const load = useCallback(() => loadLists(false), []);
+  const refresh = useCallback(() => loadLists(true), []);
+
+  useFocusRefresh(load, refresh);
 
   const tutorialSteps = useMemo<TutorialStep[]>(
     () => [

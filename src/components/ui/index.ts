@@ -4,6 +4,7 @@ export { Button } from './Button';
 export { Card } from './Card';
 export { Chip } from './Chip';
 export { FAB } from './FAB';
+export { MemberSelector } from './MemberSelector';
 export { ScreenHeader } from './ScreenHeader';
 export { SectionTitle } from './SectionTitle';
 export type { TutorialStep } from './TutorialSheet';

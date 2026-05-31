@@ -11,7 +11,7 @@ import {
   View,
 } from 'react-native';
 
-import { router, useFocusEffect } from 'expo-router';
+import { router } from 'expo-router';
 
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -36,6 +36,7 @@ import {
   type TimeGroup,
   toggleTaskDone,
 } from '@/db/modules/tasks';
+import { useFocusRefresh } from '@/hooks';
 import { prefs } from '@/storage/prefs';
 import { colors, fontFamily, fontSize } from '@/theme';
 
@@ -175,19 +176,7 @@ export default function TasksScreen() {
     toggleTask,
   } = useTasks(filter);
 
-  // Reload every time the screen gains focus — covers navigation-back after create/edit.
-  // First focus → shimmer via load(). Subsequent focuses → quiet RefreshControl via refresh().
-  const hasFocused = useRef(false);
-  useFocusEffect(
-    useCallback(() => {
-      if (!hasFocused.current) {
-        hasFocused.current = true;
-        load(); // first visit: show shimmer skeleton
-      } else {
-        refresh(); // returning: quiet RefreshControl, no flicker
-      }
-    }, [load, refresh])
-  );
+  useFocusRefresh(load, refresh);
 
   const totalTasks = groups.reduce((n, g) => n + g.data.length, 0);
 

@@ -6,6 +6,7 @@ import { openDatabaseAsync, type SQLiteDatabase } from 'expo-sqlite';
 import { migrateV1 } from './migrations/v1_init';
 import { migrateV2 } from './migrations/v2_tasks_enhanced';
 import { migrateV3 } from './migrations/v3_shopping_enhanced';
+import { migrateV4 } from './migrations/v4_calendar';
 import { DB_VERSION } from './schema';
 
 const DB_NAME = 'hearth.db';
@@ -30,6 +31,9 @@ export async function initDb(): Promise<SQLiteDatabase> {
   }
   if (currentVersion < 3) {
     await migrateV3(db);
+  }
+  if (currentVersion < 4) {
+    await migrateV4(db);
   }
 
   if (currentVersion < DB_VERSION) {

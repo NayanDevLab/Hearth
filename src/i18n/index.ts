@@ -7,6 +7,7 @@ import { initReactI18next } from 'react-i18next';
 
 import type { AppLanguage } from '@/storage/prefs';
 
+import enCalendar from './locales/en/calendar.json';
 // ─── English ──────────────────────────────────────────────────
 import enCommon from './locales/en/common.json';
 import enDashboard from './locales/en/dashboard.json';
@@ -14,12 +15,14 @@ import enOnboarding from './locales/en/onboarding.json';
 import enShopping from './locales/en/shopping.json';
 import enTasks from './locales/en/tasks.json';
 // ─── Gujarati ────────────────────────────────────────────────
+import guCalendar from './locales/gu/calendar.json';
 import guCommon from './locales/gu/common.json';
 import guDashboard from './locales/gu/dashboard.json';
 import guOnboarding from './locales/gu/onboarding.json';
 import guShopping from './locales/gu/shopping.json';
 import guTasks from './locales/gu/tasks.json';
 // ─── Hindi ───────────────────────────────────────────────────
+import hiCalendar from './locales/hi/calendar.json';
 import hiCommon from './locales/hi/common.json';
 import hiDashboard from './locales/hi/dashboard.json';
 import hiOnboarding from './locales/hi/onboarding.json';
@@ -52,7 +55,7 @@ export async function initI18n(language: AppLanguage = 'en'): Promise<void> {
     lng: language,
     fallbackLng: 'en',
     defaultNS: 'common',
-    ns: ['common', 'onboarding', 'dashboard', 'tasks', 'shopping'],
+    ns: ['common', 'onboarding', 'dashboard', 'tasks', 'shopping', 'calendar'],
     resources: {
       en: {
         common: enCommon,
@@ -60,6 +63,7 @@ export async function initI18n(language: AppLanguage = 'en'): Promise<void> {
         dashboard: enDashboard,
         tasks: enTasks,
         shopping: enShopping,
+        calendar: enCalendar,
       },
       hi: {
         common: hiCommon,
@@ -67,6 +71,7 @@ export async function initI18n(language: AppLanguage = 'en'): Promise<void> {
         dashboard: hiDashboard,
         tasks: hiTasks,
         shopping: hiShopping,
+        calendar: hiCalendar,
       },
       gu: {
         common: guCommon,
@@ -74,6 +79,7 @@ export async function initI18n(language: AppLanguage = 'en'): Promise<void> {
         dashboard: guDashboard,
         tasks: guTasks,
         shopping: guShopping,
+        calendar: guCalendar,
       },
     },
     interpolation: { escapeValue: false },

@@ -11,18 +11,28 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Icon } from '@/components/icons/Icon';
 import { ScreenHeader } from '@/components/ui';
 import { APP_BUILD, APP_VERSION } from '@/constants/settings';
+import { getAllCategories } from '@/db/modules/categories';
 import { getAllMembers } from '@/db/modules/members';
+import { getAllUnits } from '@/db/modules/units';
 import { useFocusRefresh } from '@/hooks';
 import { colors, fontFamily, fontSize, radius, spacing } from '@/theme';
 
 export default function MoreScreen() {
   const { t } = useTranslation('settings');
   const insets = useSafeAreaInsets();
-  const [memberCount, setMemberCount] = useState(5);
+  const [memberCount, setMemberCount] = useState(0);
+  const [categoryCount, setCategoryCount] = useState(0);
+  const [unitCount, setUnitCount] = useState(0);
 
   const load = useCallback(async () => {
-    const members = await getAllMembers();
+    const [members, cats, units] = await Promise.all([
+      getAllMembers(),
+      getAllCategories(),
+      getAllUnits(),
+    ]);
     setMemberCount(members.length);
+    setCategoryCount(cats.length);
+    setUnitCount(units.length);
   }, []);
 
   useFocusRefresh(load, load);
@@ -57,7 +67,7 @@ export default function MoreScreen() {
             icon={<Icon.tasks size={18} color="#4AADD1" />}
             iconBg={colors.skySoft}
             label={t('categories_title')}
-            value={t('n_categories', { n: 14 })}
+            value={t('n_categories', { n: categoryCount })}
             subtitle={t('categories_subtitle')}
             onPress={() => router.push('/settings/categories' as never)}
           />
@@ -65,7 +75,7 @@ export default function MoreScreen() {
             icon={<Text style={styles.halfIcon}>½</Text>}
             iconBg={colors.mintSoft}
             label={t('units_title')}
-            value={t('n_units', { n: 18 })}
+            value={t('n_units', { n: unitCount })}
             subtitle={t('units_subtitle')}
             onPress={() => router.push('/settings/units' as never)}
             isLast

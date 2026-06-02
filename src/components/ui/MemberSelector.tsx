@@ -6,20 +6,27 @@ import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-nati
 
 import { Icon } from '@/components/icons/Icon';
 import { Avatar } from '@/components/ui/Avatar';
-import { HOUSEHOLD_MEMBERS } from '@/constants/tasks';
+import { type HouseholdMember } from '@/db/modules/members';
+import { useMembers } from '@/hooks';
 import { colors, fontFamily } from '@/theme';
 
 interface MemberSelectorProps {
   selected: string | null; // member initial, or null = Anyone
   onChange: (initial: string | null) => void;
   anyoneLabel?: string; // i18n label for the "ANY" tile
+  members?: HouseholdMember[]; // override — if omitted, loads from DB
+  visibility?: 'tasks' | 'bills' | 'calendar' | 'meals';
 }
 
 export function MemberSelector({
   selected,
   onChange,
   anyoneLabel = 'Anyone',
+  members: membersProp,
+  visibility,
 }: MemberSelectorProps) {
+  const dbMembers = useMembers(membersProp ? undefined : visibility);
+  const members = membersProp ?? dbMembers;
   return (
     <ScrollView horizontal showsHorizontalScrollIndicator={false}>
       <View style={styles.row}>
@@ -36,7 +43,7 @@ export function MemberSelector({
         </TouchableOpacity>
 
         {/* Household members */}
-        {HOUSEHOLD_MEMBERS.map((m) => {
+        {members.map((m) => {
           const sel = selected === m.initial;
           return (
             <TouchableOpacity

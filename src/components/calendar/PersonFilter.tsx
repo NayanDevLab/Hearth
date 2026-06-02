@@ -5,7 +5,7 @@ import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-nati
 
 import { useTranslation } from 'react-i18next';
 
-import { HOUSEHOLD_MEMBERS } from '@/constants/tasks';
+import { useMembers } from '@/hooks';
 import { colors, fontFamily, fontSize, radius } from '@/theme';
 
 export type CalendarPerson = 'everyone' | 'just_me' | string; // string = member initial
@@ -17,6 +17,7 @@ interface PersonFilterProps {
 
 export function PersonFilter({ selected, onChange }: PersonFilterProps) {
   const { t } = useTranslation('calendar');
+  const members = useMembers('calendar');
 
   return (
     <ScrollView
@@ -48,7 +49,7 @@ export function PersonFilter({ selected, onChange }: PersonFilterProps) {
       </TouchableOpacity>
 
       {/* Members */}
-      {HOUSEHOLD_MEMBERS.map((m) => {
+      {members.map((m) => {
         const isActive = selected === m.initial;
         return (
           <TouchableOpacity

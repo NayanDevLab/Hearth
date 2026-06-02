@@ -268,7 +268,7 @@ export const LIST_ICON_OPTIONS = [
 export interface ShoppingFormFields {
   name: string;
   quantity: number;
-  unit: ShoppingUnit;
+  unit: string;
   category: string;
   assignee: string | null;
   brand: string;
@@ -292,7 +292,7 @@ export function itemToForm(item: ShoppingItem): ShoppingFormFields {
   return {
     name: item.name,
     quantity: item.quantity,
-    unit: (item.unit ?? 'ea') as ShoppingUnit,
+    unit: item.unit ?? 'ea',
     category: item.category ?? '',
     assignee: item.assignee ?? null,
     brand: item.brand ?? '',

@@ -20,14 +20,9 @@ import { useTranslation } from 'react-i18next';
 import { FormBottomBar, FormField } from '@/components/forms';
 import { Icon } from '@/components/icons/Icon';
 import { MemberSelector, ScreenHeader } from '@/components/ui';
-import {
-  detectCategory,
-  INITIAL_SHOPPING_FORM,
-  SHOPPING_CATEGORIES,
-  SHOPPING_UNITS,
-  type ShoppingFormFields,
-} from '@/constants/shopping';
+import { INITIAL_SHOPPING_FORM, type ShoppingFormFields } from '@/constants/shopping';
 import { getAllLists, insertItem, insertList, type ShoppingList } from '@/db/modules/shopping';
+import { useCategories, useUnits } from '@/hooks';
 import { colors, fontFamily, fontSize, radius, spacing } from '@/theme';
 
 export default function NewItemScreen() {
@@ -44,7 +39,8 @@ export default function NewItemScreen() {
     setForm((prev) => ({ ...prev, [key]: value }));
   }
 
-  const effectiveCategory = form.category || (form.name.trim() ? detectCategory(form.name) : '');
+  const categories = useCategories();
+  const units = useUnits();
   const isValid = form.name.trim().length > 0 && selectedListId.length > 0;
 
   useEffect(() => {
@@ -81,7 +77,7 @@ export default function NewItemScreen() {
         name: form.name.trim(),
         quantity: form.quantity,
         unit: form.unit,
-        category: effectiveCategory || 'other',
+        category: form.category || undefined,
         brand: form.brand.trim() || undefined,
         note: form.note.trim() || undefined,
         assignee: form.assignee ?? undefined,
@@ -132,7 +128,6 @@ export default function NewItemScreen() {
               autoFocus
               autoCapitalize="sentences"
             />
-            {form.name.length > 2 && <Text style={styles.autoHint}>{t('auto_category_hint')}</Text>}
           </FormField>
 
           <FormField label={t('quantity_label')}>
@@ -160,15 +155,17 @@ export default function NewItemScreen() {
                 style={styles.unitScroll}
               >
                 <View style={styles.unitRow}>
-                  {SHOPPING_UNITS.map((u) => (
+                  {units.map((u) => (
                     <TouchableOpacity
-                      key={u}
-                      style={[styles.unitChip, form.unit === u && styles.unitChipActive]}
-                      onPress={() => update('unit', u)}
+                      key={u.id}
+                      style={[styles.unitChip, form.unit === u.abbr && styles.unitChipActive]}
+                      onPress={() => update('unit', u.abbr)}
                       activeOpacity={0.75}
                     >
-                      <Text style={[styles.unitText, form.unit === u && styles.unitTextActive]}>
-                        {u}
+                      <Text
+                        style={[styles.unitText, form.unit === u.abbr && styles.unitTextActive]}
+                      >
+                        {u.abbr}
                       </Text>
                     </TouchableOpacity>
                   ))}
@@ -179,18 +176,21 @@ export default function NewItemScreen() {
 
           <FormField label={t('category_label')}>
             <View style={styles.catGrid}>
-              {SHOPPING_CATEGORIES.map((cat) => {
-                const active = effectiveCategory === cat.id;
+              {categories.map((cat) => {
+                const active = form.category === cat.id;
                 return (
                   <TouchableOpacity
                     key={cat.id}
-                    style={[styles.catTile, { backgroundColor: active ? cat.color : cat.soft }]}
+                    style={[
+                      styles.catTile,
+                      { backgroundColor: active ? cat.color : colors.surface2 },
+                    ]}
                     activeOpacity={0.75}
-                    onPress={() => update('category', cat.id)}
+                    onPress={() => update('category', active ? '' : cat.id)}
                   >
                     <Text style={styles.catEmoji}>{cat.emoji}</Text>
                     <Text style={[styles.catLabel, { color: active ? colors.white : cat.color }]}>
-                      {cat.label}
+                      {cat.name}
                     </Text>
                   </TouchableOpacity>
                 );

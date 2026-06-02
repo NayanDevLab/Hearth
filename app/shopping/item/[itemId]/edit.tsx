@@ -22,13 +22,7 @@ import { FormBottomBar, FormField } from '@/components/forms';
 import { Icon } from '@/components/icons/Icon';
 import { ItemDeleteSheet } from '@/components/shopping';
 import { MemberSelector, ScreenHeader } from '@/components/ui';
-import {
-  INITIAL_SHOPPING_FORM,
-  itemToForm,
-  SHOPPING_CATEGORIES,
-  SHOPPING_UNITS,
-  type ShoppingFormFields,
-} from '@/constants/shopping';
+import { INITIAL_SHOPPING_FORM, itemToForm, type ShoppingFormFields } from '@/constants/shopping';
 import {
   deleteItem,
   getItemById,
@@ -38,6 +32,7 @@ import {
   toggleItem,
   updateItem,
 } from '@/db/modules/shopping';
+import { useCategories, useUnits } from '@/hooks';
 import { colors, fontFamily, fontSize, radius, spacing } from '@/theme';
 
 export default function EditItemScreen() {
@@ -51,6 +46,9 @@ export default function EditItemScreen() {
   const [saving, setSaving] = useState(false);
   const [deleteVisible, setDeleteVisible] = useState(false);
   const [form, setForm] = useState<ShoppingFormFields>(INITIAL_SHOPPING_FORM);
+
+  const categories = useCategories();
+  const units = useUnits();
 
   function update<K extends keyof ShoppingFormFields>(key: K, value: ShoppingFormFields[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -157,15 +155,17 @@ export default function EditItemScreen() {
               </View>
               <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                 <View style={styles.unitRow}>
-                  {SHOPPING_UNITS.map((u) => (
+                  {units.map((u) => (
                     <TouchableOpacity
-                      key={u}
-                      style={[styles.unitChip, form.unit === u && styles.unitChipActive]}
-                      onPress={() => update('unit', u)}
+                      key={u.id}
+                      style={[styles.unitChip, form.unit === u.abbr && styles.unitChipActive]}
+                      onPress={() => update('unit', u.abbr)}
                       activeOpacity={0.75}
                     >
-                      <Text style={[styles.unitText, form.unit === u && styles.unitTextActive]}>
-                        {u}
+                      <Text
+                        style={[styles.unitText, form.unit === u.abbr && styles.unitTextActive]}
+                      >
+                        {u.abbr}
                       </Text>
                     </TouchableOpacity>
                   ))}
@@ -176,18 +176,21 @@ export default function EditItemScreen() {
 
           <FormField label={t('category_label')}>
             <View style={styles.catGrid}>
-              {SHOPPING_CATEGORIES.map((cat) => {
+              {categories.map((cat) => {
                 const active = form.category === cat.id;
                 return (
                   <TouchableOpacity
                     key={cat.id}
-                    style={[styles.catTile, { backgroundColor: active ? cat.color : cat.soft }]}
+                    style={[
+                      styles.catTile,
+                      { backgroundColor: active ? cat.color : colors.surface2 },
+                    ]}
                     activeOpacity={0.75}
-                    onPress={() => update('category', cat.id)}
+                    onPress={() => update('category', active ? '' : cat.id)}
                   >
                     <Text style={styles.catEmoji}>{cat.emoji}</Text>
                     <Text style={[styles.catLabel, { color: active ? colors.white : cat.color }]}>
-                      {cat.label}
+                      {cat.name}
                     </Text>
                   </TouchableOpacity>
                 );

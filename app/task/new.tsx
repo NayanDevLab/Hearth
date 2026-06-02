@@ -25,13 +25,13 @@ import { FormBottomBar, FormField, PickerRow, SimplePickerSheet } from '@/compon
 import { Icon } from '@/components/icons/Icon';
 import { MemberSelector, ScreenHeader } from '@/components/ui';
 import {
-  CATEGORIES,
   getPriorityOptions,
   REMINDER_OPTIONS,
   REPEAT_OPTIONS,
   repeatTagLabel,
 } from '@/constants/tasks';
 import { insertTask, type TaskPriority, type TaskRecurrence } from '@/db/modules/tasks';
+import { useCategories } from '@/hooks';
 import { colors, fontFamily, fontSize, radius, spacing } from '@/theme';
 import { formatPickerLabel } from '@/utils';
 
@@ -53,6 +53,7 @@ export default function NewTaskScreen() {
   const [notes, setNotes] = useState('');
   const [saving, setSaving] = useState(false);
 
+  const categories = useCategories('tasks');
   const isValid = title.trim().length > 0;
   const priorityOpts = getPriorityOptions(t);
   const repeatLabel =
@@ -143,19 +144,23 @@ export default function NewTaskScreen() {
 
           <FormField label={t('category_label')}>
             <View style={styles.chips}>
-              {CATEGORIES.map((c) => {
+              {categories.map((c) => {
                 const active = category === c.id;
                 return (
                   <TouchableOpacity
                     key={c.id}
-                    style={[styles.categoryChip, { backgroundColor: active ? c.color : c.soft }]}
+                    style={[
+                      styles.categoryChip,
+                      { backgroundColor: active ? c.color : colors.surface2 },
+                    ]}
                     activeOpacity={0.75}
                     onPress={() => setCategory(active ? null : c.id)}
                   >
+                    <Text style={styles.categoryChipEmoji}>{c.emoji}</Text>
                     <Text
                       style={[styles.categoryChipText, { color: active ? colors.white : c.color }]}
                     >
-                      {c.label}
+                      {c.name}
                     </Text>
                   </TouchableOpacity>
                 );
@@ -316,7 +321,15 @@ const styles = StyleSheet.create({
   },
   inputFilled: { borderColor: colors.primary },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  categoryChip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: radius.pill },
+  categoryChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: radius.pill,
+  },
+  categoryChipEmoji: { fontSize: 13 },
   categoryChipText: { fontFamily: fontFamily.semiBold, fontSize: 13 },
   priorityRow: { flexDirection: 'row', gap: 8 },
   priorityBtn: {

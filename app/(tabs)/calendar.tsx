@@ -20,21 +20,23 @@ import { Icon } from '@/components/icons/Icon';
 import { EmptyState, ErrorState } from '@/components/shared';
 import { FAB, ScreenHeader, TutorialSheet, type TutorialStep } from '@/components/ui';
 import { type CalendarView, formatDateKey, formatDisplayDate } from '@/constants/calendar';
-import { HOUSEHOLD_MEMBERS } from '@/constants/tasks';
 import {
   type CalendarEvent,
   getEventsForDay,
   getMonthDots,
   getUpcomingEvents,
 } from '@/db/modules/events';
-import { useFocusRefresh } from '@/hooks';
+import { useFocusRefresh, useMembers } from '@/hooks';
 import { colors, fontFamily, fontSize, spacing } from '@/theme';
-
-const MEMBER_COLOR_MAP = Object.fromEntries(HOUSEHOLD_MEMBERS.map((m) => [m.initial, m.color]));
 
 export default function CalendarScreen() {
   const { t } = useTranslation('calendar');
   const insets = useSafeAreaInsets();
+  const members = useMembers();
+  const memberColorMap = useMemo(
+    () => Object.fromEntries(members.map((m) => [m.initial, m.color])),
+    [members]
+  );
 
   const today = new Date();
 
@@ -67,7 +69,7 @@ export default function CalendarScreen() {
       setCalData((d) => ({ ...d, refreshing: isRefresh, error: null }));
       try {
         const [dots, day, schedule] = await Promise.all([
-          getMonthDots(yearMonth, MEMBER_COLOR_MAP),
+          getMonthDots(yearMonth, memberColorMap),
           getEventsForDay(selectedDate),
           getUpcomingEvents(50),
         ]);
@@ -86,7 +88,7 @@ export default function CalendarScreen() {
         }));
       }
     },
-    [yearMonth, selectedDate]
+    [yearMonth, selectedDate, memberColorMap]
   );
 
   const load = useCallback(() => loadCalendar(false), [loadCalendar]);
@@ -121,7 +123,7 @@ export default function CalendarScreen() {
         body: t('tutorial_step1_body'),
         example: (
           <View style={eg.memberRow}>
-            {HOUSEHOLD_MEMBERS.map((m) => (
+            {members.map((m) => (
               <View key={m.initial} style={eg.memberItem}>
                 <View style={[eg.memberDot, { backgroundColor: m.color }]} />
                 <Text style={eg.memberName}>{m.name}</Text>
@@ -156,7 +158,7 @@ export default function CalendarScreen() {
         ),
       },
     ],
-    [t]
+    [t, members]
   );
 
   if (error) {

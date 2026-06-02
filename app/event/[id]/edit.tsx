@@ -25,14 +25,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { FormBottomBar, FormField } from '@/components/forms';
 import { MemberSelector, ScreenHeader } from '@/components/ui';
-import {
-  addMinutes,
-  DURATION_CHIPS,
-  EVENT_CATEGORIES,
-  formatDateKey,
-  parseDate,
-} from '@/constants/calendar';
+import { addMinutes, DURATION_CHIPS, formatDateKey, parseDate } from '@/constants/calendar';
 import { type CalendarEvent, getEventById, updateEvent } from '@/db/modules/events';
+import { useCategories } from '@/hooks';
 import { colors, fontFamily, fontSize, radius, spacing } from '@/theme';
 
 interface EditForm {
@@ -67,6 +62,7 @@ export default function EditEventScreen() {
   const { t: tc } = useTranslation('common');
   const insets = useSafeAreaInsets();
 
+  const categories = useCategories('calendar');
   const [loadingEvent, setLoadingEvent] = useState(true);
   const [form, setForm] = useState<EditForm>({
     title: '',
@@ -192,7 +188,7 @@ export default function EditEventScreen() {
           <FormField label="Title">
             <View style={styles.titleRow}>
               <Text style={styles.catEmoji}>
-                {EVENT_CATEGORIES.find((c) => c.id === form.category)?.emoji ?? '📅'}
+                {categories.find((c) => c.id === form.category)?.emoji ?? '📅'}
               </Text>
               <TextInput
                 style={[styles.titleInput, form.title.length > 0 && styles.inputFilled]}
@@ -277,20 +273,23 @@ export default function EditEventScreen() {
 
           <FormField label={t('category_label')}>
             <View style={styles.catGrid}>
-              {EVENT_CATEGORIES.map((cat) => {
+              {categories.map((cat) => {
                 const active = form.category === cat.id;
                 return (
                   <TouchableOpacity
                     key={cat.id}
-                    style={[styles.catTile, { backgroundColor: active ? cat.color : cat.soft }]}
+                    style={[
+                      styles.catTile,
+                      { backgroundColor: active ? cat.color : colors.surface2 },
+                    ]}
                     activeOpacity={0.75}
-                    onPress={() => update('category', cat.id)}
+                    onPress={() => update('category', active ? '' : cat.id)}
                   >
                     <Text style={styles.catTileEmoji}>{cat.emoji}</Text>
                     <Text
                       style={[styles.catTileLabel, { color: active ? colors.white : cat.color }]}
                     >
-                      {cat.label}
+                      {cat.name}
                     </Text>
                   </TouchableOpacity>
                 );

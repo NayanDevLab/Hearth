@@ -6,7 +6,7 @@ import { ScrollView, StyleSheet, Text, TouchableOpacity } from 'react-native';
 
 import { useTranslation } from 'react-i18next';
 
-import { SHOPPING_CATEGORIES } from '@/constants/shopping';
+import { useCategories } from '@/hooks';
 import { colors, fontFamily, fontSize, radius, spacing } from '@/theme';
 
 interface CategoryCount {
@@ -23,6 +23,7 @@ interface CategoryFilterProps {
 
 export function CategoryFilter({ active, counts, totalCount, onChange }: CategoryFilterProps) {
   const { t } = useTranslation('shopping');
+  const dbCategories = useCategories();
 
   const catMap = Object.fromEntries(counts.map((c) => [c.category, c.total]));
 
@@ -45,22 +46,27 @@ export function CategoryFilter({ active, counts, totalCount, onChange }: Categor
       </TouchableOpacity>
 
       {/* Per-category chips — only show categories that have items */}
-      {SHOPPING_CATEGORIES.filter((c) => catMap[c.id] && catMap[c.id] > 0).map((cat) => {
-        const isActive = active === cat.id;
-        return (
-          <TouchableOpacity
-            key={cat.id}
-            style={[styles.chip, isActive && { backgroundColor: cat.soft, borderColor: cat.color }]}
-            activeOpacity={0.7}
-            onPress={() => onChange(cat.id)}
-          >
-            <Text style={styles.chipEmoji}>{cat.emoji}</Text>
-            <Text style={[styles.chipText, isActive && { color: cat.color }]}>
-              {cat.label} · {catMap[cat.id]}
-            </Text>
-          </TouchableOpacity>
-        );
-      })}
+      {dbCategories
+        .filter((c) => catMap[c.id] > 0)
+        .map((cat) => {
+          const isActive = active === cat.id;
+          return (
+            <TouchableOpacity
+              key={cat.id}
+              style={[
+                styles.chip,
+                isActive && { backgroundColor: colors.surface2, borderColor: cat.color },
+              ]}
+              activeOpacity={0.7}
+              onPress={() => onChange(cat.id)}
+            >
+              <Text style={styles.chipEmoji}>{cat.emoji}</Text>
+              <Text style={[styles.chipText, isActive && { color: cat.color }]}>
+                {cat.name} · {catMap[cat.id]}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
     </ScrollView>
   );
 }

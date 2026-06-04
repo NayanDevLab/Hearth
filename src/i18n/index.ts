@@ -11,6 +11,7 @@ import enCalendar from './locales/en/calendar.json';
 // ─── English ──────────────────────────────────────────────────
 import enCommon from './locales/en/common.json';
 import enDashboard from './locales/en/dashboard.json';
+import enLocator from './locales/en/locator.json';
 import enOnboarding from './locales/en/onboarding.json';
 import enSettings from './locales/en/settings.json';
 import enShopping from './locales/en/shopping.json';
@@ -19,6 +20,7 @@ import enTasks from './locales/en/tasks.json';
 import guCalendar from './locales/gu/calendar.json';
 import guCommon from './locales/gu/common.json';
 import guDashboard from './locales/gu/dashboard.json';
+import guLocator from './locales/gu/locator.json';
 import guOnboarding from './locales/gu/onboarding.json';
 import guSettings from './locales/gu/settings.json';
 import guShopping from './locales/gu/shopping.json';
@@ -27,6 +29,7 @@ import guTasks from './locales/gu/tasks.json';
 import hiCalendar from './locales/hi/calendar.json';
 import hiCommon from './locales/hi/common.json';
 import hiDashboard from './locales/hi/dashboard.json';
+import hiLocator from './locales/hi/locator.json';
 import hiOnboarding from './locales/hi/onboarding.json';
 import hiSettings from './locales/hi/settings.json';
 import hiShopping from './locales/hi/shopping.json';
@@ -58,7 +61,16 @@ export async function initI18n(language: AppLanguage = 'en'): Promise<void> {
     lng: language,
     fallbackLng: 'en',
     defaultNS: 'common',
-    ns: ['common', 'onboarding', 'dashboard', 'tasks', 'shopping', 'calendar', 'settings'],
+    ns: [
+      'common',
+      'onboarding',
+      'dashboard',
+      'tasks',
+      'shopping',
+      'calendar',
+      'settings',
+      'locator',
+    ],
     resources: {
       en: {
         common: enCommon,
@@ -68,6 +80,7 @@ export async function initI18n(language: AppLanguage = 'en'): Promise<void> {
         shopping: enShopping,
         calendar: enCalendar,
         settings: enSettings,
+        locator: enLocator,
       },
       hi: {
         common: hiCommon,
@@ -77,6 +90,7 @@ export async function initI18n(language: AppLanguage = 'en'): Promise<void> {
         shopping: hiShopping,
         calendar: hiCalendar,
         settings: hiSettings,
+        locator: hiLocator,
       },
       gu: {
         common: guCommon,
@@ -86,6 +100,7 @@ export async function initI18n(language: AppLanguage = 'en'): Promise<void> {
         shopping: guShopping,
         calendar: guCalendar,
         settings: guSettings,
+        locator: guLocator,
       },
     },
     interpolation: { escapeValue: false },

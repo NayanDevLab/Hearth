@@ -9,6 +9,7 @@ import { migrateV3 } from './migrations/v3_shopping_enhanced';
 import { migrateV4 } from './migrations/v4_calendar';
 import { migrateV5 } from './migrations/v5_library';
 import { migrateV6 } from './migrations/v6_categories_units';
+import { migrateV7 } from './migrations/v7_locator';
 import { DB_VERSION } from './schema';
 
 const DB_NAME = 'hearth.db';
@@ -42,6 +43,9 @@ export async function initDb(): Promise<SQLiteDatabase> {
   }
   if (currentVersion < 6) {
     await migrateV6(db);
+  }
+  if (currentVersion < 7) {
+    await migrateV7(db);
   }
 
   if (currentVersion < DB_VERSION) {

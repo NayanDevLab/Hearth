@@ -12,6 +12,7 @@ import { Icon } from '@/components/icons/Icon';
 import { ScreenHeader } from '@/components/ui';
 import { APP_BUILD, APP_VERSION } from '@/constants/settings';
 import { getAllCategories } from '@/db/modules/categories';
+import { getLocatorStats } from '@/db/modules/locator';
 import { getAllMembers } from '@/db/modules/members';
 import { getAllUnits } from '@/db/modules/units';
 import { useFocusRefresh } from '@/hooks';
@@ -23,16 +24,19 @@ export default function MoreScreen() {
   const [memberCount, setMemberCount] = useState(0);
   const [categoryCount, setCategoryCount] = useState(0);
   const [unitCount, setUnitCount] = useState(0);
+  const [locatorItems, setLocatorItems] = useState(0);
 
   const load = useCallback(async () => {
-    const [members, cats, units] = await Promise.all([
+    const [members, cats, units, locStats] = await Promise.all([
       getAllMembers(),
       getAllCategories(),
       getAllUnits(),
+      getLocatorStats(),
     ]);
     setMemberCount(members.length);
     setCategoryCount(cats.length);
     setUnitCount(units.length);
+    setLocatorItems(locStats.items);
   }, []);
 
   useFocusRefresh(load, load);
@@ -78,6 +82,14 @@ export default function MoreScreen() {
             value={t('n_units', { n: unitCount })}
             subtitle={t('units_subtitle')}
             onPress={() => router.push('/settings/units' as never)}
+          />
+          <LibraryRow
+            icon={<Text style={styles.emojiIcon}>📦</Text>}
+            iconBg={colors.butterSoft}
+            label="Item Locator"
+            value={`${locatorItems} items`}
+            subtitle="Find anything in your home instantly"
+            onPress={() => router.push('/locator' as never)}
             isLast
           />
         </LibrarySection>

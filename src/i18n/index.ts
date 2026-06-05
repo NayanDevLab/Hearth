@@ -12,6 +12,7 @@ import enCalendar from './locales/en/calendar.json';
 import enCommon from './locales/en/common.json';
 import enDashboard from './locales/en/dashboard.json';
 import enLocator from './locales/en/locator.json';
+import enMaintenance from './locales/en/maintenance.json';
 import enMoney from './locales/en/money.json';
 import enOnboarding from './locales/en/onboarding.json';
 import enSettings from './locales/en/settings.json';
@@ -22,6 +23,7 @@ import guCalendar from './locales/gu/calendar.json';
 import guCommon from './locales/gu/common.json';
 import guDashboard from './locales/gu/dashboard.json';
 import guLocator from './locales/gu/locator.json';
+import guMaintenance from './locales/gu/maintenance.json';
 import guMoney from './locales/gu/money.json';
 import guOnboarding from './locales/gu/onboarding.json';
 import guSettings from './locales/gu/settings.json';
@@ -32,6 +34,7 @@ import hiCalendar from './locales/hi/calendar.json';
 import hiCommon from './locales/hi/common.json';
 import hiDashboard from './locales/hi/dashboard.json';
 import hiLocator from './locales/hi/locator.json';
+import hiMaintenance from './locales/hi/maintenance.json';
 import hiMoney from './locales/hi/money.json';
 import hiOnboarding from './locales/hi/onboarding.json';
 import hiSettings from './locales/hi/settings.json';
@@ -73,6 +76,7 @@ export async function initI18n(language: AppLanguage = 'en'): Promise<void> {
       'calendar',
       'settings',
       'locator',
+      'maintenance',
       'money',
     ],
     resources: {
@@ -85,6 +89,7 @@ export async function initI18n(language: AppLanguage = 'en'): Promise<void> {
         calendar: enCalendar,
         settings: enSettings,
         locator: enLocator,
+        maintenance: enMaintenance,
         money: enMoney,
       },
       hi: {
@@ -96,6 +101,7 @@ export async function initI18n(language: AppLanguage = 'en'): Promise<void> {
         calendar: hiCalendar,
         settings: hiSettings,
         locator: hiLocator,
+        maintenance: hiMaintenance,
         money: hiMoney,
       },
       gu: {
@@ -107,6 +113,7 @@ export async function initI18n(language: AppLanguage = 'en'): Promise<void> {
         calendar: guCalendar,
         settings: guSettings,
         locator: guLocator,
+        maintenance: guMaintenance,
         money: guMoney,
       },
     },

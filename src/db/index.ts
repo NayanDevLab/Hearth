@@ -11,6 +11,7 @@ import { migrateV5 } from './migrations/v5_library';
 import { migrateV6 } from './migrations/v6_categories_units';
 import { migrateV7 } from './migrations/v7_locator';
 import { migrateV8 } from './migrations/v8_money';
+import { migrateV9 } from './migrations/v9_maintenance';
 import { DB_VERSION } from './schema';
 
 const DB_NAME = 'hearth.db';
@@ -50,6 +51,9 @@ export async function initDb(): Promise<SQLiteDatabase> {
   }
   if (currentVersion < 8) {
     await migrateV8(db);
+  }
+  if (currentVersion < 9) {
+    await migrateV9(db);
   }
 
   if (currentVersion < DB_VERSION) {

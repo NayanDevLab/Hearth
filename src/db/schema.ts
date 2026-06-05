@@ -2,7 +2,7 @@
 // Each module owns its tables; add new tables in the matching section.
 // Bump DB_VERSION and add a migration in migrations/ when changing schema.
 
-export const DB_VERSION = 8;
+export const DB_VERSION = 9;
 
 export const SQL_TABLES = {
   // ─── Tasks ────────────────────────────────────────────────

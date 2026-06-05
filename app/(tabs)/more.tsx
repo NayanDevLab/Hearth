@@ -103,6 +103,14 @@ export default function MoreScreen() {
             value=""
             subtitle="Track bills, split expenses, settle up"
             onPress={() => router.push('/money' as never)}
+          />
+          <LibraryRow
+            icon={<Icon.tools size={18} color={colors.rose} />}
+            iconBg={colors.roseSoft}
+            label="Maintenance"
+            value=""
+            subtitle="Repairs, appliances, vendors"
+            onPress={() => router.push('/maintenance' as never)}
             isLast
           />
         </LibrarySection>

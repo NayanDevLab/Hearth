@@ -94,6 +94,19 @@ export default function MoreScreen() {
           />
         </LibrarySection>
 
+        {/* Section: Features */}
+        <LibrarySection label="Features">
+          <LibraryRow
+            icon={<Icon.wallet size={18} color={colors.primary} />}
+            iconBg={colors.primarySoft}
+            label="Bills & Expenses"
+            value=""
+            subtitle="Track bills, split expenses, settle up"
+            onPress={() => router.push('/money' as never)}
+            isLast
+          />
+        </LibrarySection>
+
         {/* Section: App */}
         <LibrarySection label={t('app_section')}>
           <LibraryRow

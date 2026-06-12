@@ -2,7 +2,7 @@
 // Each module owns its tables; add new tables in the matching section.
 // Bump DB_VERSION and add a migration in migrations/ when changing schema.
 
-export const DB_VERSION = 9;
+export const DB_VERSION = 10;
 
 export const SQL_TABLES = {
   // ─── Tasks ────────────────────────────────────────────────
@@ -80,12 +80,18 @@ export const SQL_TABLES = {
     CREATE TABLE IF NOT EXISTS pantry_items (
       id            TEXT PRIMARY KEY,
       name          TEXT NOT NULL,
-      quantity      REAL NOT NULL DEFAULT 1,
-      unit          TEXT,
-      category      TEXT,
+      brand         TEXT,
+      emoji         TEXT NOT NULL DEFAULT '📦',
+      location_id   TEXT NOT NULL DEFAULT 'pantry',
+      qty           REAL NOT NULL DEFAULT 1,
+      unit          TEXT NOT NULL DEFAULT 'ea',
+      low_threshold REAL NOT NULL DEFAULT 0,
       expiry_date   TEXT,
-      low_threshold  REAL,
-      created_at    TEXT NOT NULL DEFAULT (datetime('now'))
+      warn_days     INTEGER NOT NULL DEFAULT 3,
+      auto_add      INTEGER NOT NULL DEFAULT 0,
+      notes         TEXT,
+      created_at    TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at    TEXT NOT NULL DEFAULT (datetime('now'))
     );
   `,
 

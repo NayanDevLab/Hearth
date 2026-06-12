@@ -111,6 +111,14 @@ export default function MoreScreen() {
             value=""
             subtitle="Repairs, appliances, vendors"
             onPress={() => router.push('/maintenance' as never)}
+          />
+          <LibraryRow
+            icon={<Icon.pantry size={18} color={colors.mint} />}
+            iconBg={colors.mintSoft}
+            label="Pantry & Inventory"
+            value=""
+            subtitle="Track stock, expiry, and low items"
+            onPress={() => router.push('/pantry' as never)}
             isLast
           />
         </LibrarySection>

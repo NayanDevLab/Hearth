@@ -36,12 +36,14 @@ import {
   deleteTask,
   deleteTaskSeries,
   getTaskById,
+  getTaskIdsByRecurrence,
   type Task,
   type TaskPriority,
   type TaskRecurrence,
   updateTask,
 } from '@/db/modules/tasks';
 import { useCategories } from '@/hooks';
+import { cancelTaskReminders, scheduleTaskReminder } from '@/lib/notifications';
 import { colors, fontFamily, fontSize, radius, spacing } from '@/theme';
 import { formatPickerLabel } from '@/utils';
 
@@ -119,8 +121,9 @@ export default function EditTaskScreen() {
     if (!isValid || saving || !id) return;
     setSaving(true);
     try {
+      const trimmedTitle = title.trim();
       await updateTask(id, {
-        title: title.trim(),
+        title: trimmedTitle,
         assignee: assignee ?? undefined,
         due_time: dueDate?.toISOString() ?? undefined,
         recurrence,
@@ -136,6 +139,13 @@ export default function EditTaskScreen() {
             never: '',
           }) || undefined,
       });
+      await scheduleTaskReminder({
+        id,
+        title: trimmedTitle,
+        due_time: dueDate?.toISOString(),
+        reminder: reminder ?? undefined,
+        done: original?.done ?? false,
+      });
       router.back();
     } catch {
       /* TODO: toast */
@@ -148,13 +158,16 @@ export default function EditTaskScreen() {
     if (!id) return;
     setDeleteVisible(false);
     await deleteTask(id);
+    await cancelTaskReminders([id]);
     router.dismissAll();
   }
 
   async function handleDeleteSeries() {
     if (!original?.recurrence_id) return;
     setDeleteVisible(false);
+    const ids = await getTaskIdsByRecurrence(original.recurrence_id);
     await deleteTaskSeries(original.recurrence_id);
+    await cancelTaskReminders(ids);
     router.dismissAll();
   }
 

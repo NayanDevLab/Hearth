@@ -25,10 +25,12 @@ import {
   deleteTaskSeries,
   getTaskById,
   getTaskHistory,
+  getTaskIdsByRecurrence,
   type Task,
   type TaskCompletion,
   toggleTaskDone,
 } from '@/db/modules/tasks';
+import { cancelTaskReminders, scheduleTaskReminder } from '@/lib/notifications';
 import { prefs } from '@/storage/prefs';
 import { colors, fontFamily, fontSize, radius, spacing } from '@/theme';
 import { formatDateWithTime, formatFullDate } from '@/utils';
@@ -80,6 +82,13 @@ export default function TaskDetailScreen() {
     try {
       const userName = await prefs.getUserName();
       await toggleTaskDone(task.id, newDone, userName?.charAt(0).toUpperCase() ?? undefined);
+      await scheduleTaskReminder({
+        id: task.id,
+        title: task.title,
+        due_time: task.due_time,
+        reminder: task.reminder,
+        done: newDone,
+      });
     } catch {
       setTask((prev) => (prev ? { ...prev, done: !newDone } : prev));
     } finally {
@@ -91,13 +100,16 @@ export default function TaskDetailScreen() {
     if (!task) return;
     setDeleteVisible(false);
     await deleteTask(task.id);
+    await cancelTaskReminders([task.id]);
     router.back();
   };
 
   const handleDeleteSeries = async () => {
     if (!task?.recurrence_id) return;
     setDeleteVisible(false);
+    const ids = await getTaskIdsByRecurrence(task.recurrence_id);
     await deleteTaskSeries(task.recurrence_id);
+    await cancelTaskReminders(ids);
     router.back();
   };
 

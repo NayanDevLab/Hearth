@@ -14,6 +14,7 @@ import {
 
 import { initDb } from '@/db';
 import { initI18n } from '@/i18n';
+import { rescheduleAllTaskReminders, setupNotifications } from '@/lib/notifications';
 import { prefs } from '@/storage/prefs';
 
 import '../src/styles/global.css';
@@ -39,6 +40,9 @@ export default function RootLayout() {
         // 2. Load saved language and init i18next
         const lang = await prefs.getLanguage();
         await initI18n(lang);
+        // 3. Request notification permissions and re-sync task reminders
+        await setupNotifications();
+        await rescheduleAllTaskReminders();
       } catch (e) {
         console.error('Bootstrap error:', e);
       } finally {

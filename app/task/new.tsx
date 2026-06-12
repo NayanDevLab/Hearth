@@ -32,6 +32,7 @@ import {
 } from '@/constants/tasks';
 import { insertTask, type TaskPriority, type TaskRecurrence } from '@/db/modules/tasks';
 import { useCategories } from '@/hooks';
+import { scheduleTaskReminder } from '@/lib/notifications';
 import { colors, fontFamily, fontSize, radius, spacing } from '@/theme';
 import { formatPickerLabel } from '@/utils';
 
@@ -88,9 +89,11 @@ export default function NewTaskScreen() {
     if (!isValid || saving) return;
     setSaving(true);
     try {
+      const id = `task_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+      const trimmedTitle = title.trim();
       await insertTask({
-        id: `task_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
-        title: title.trim(),
+        id,
+        title: trimmedTitle,
         assignee: assignee ?? undefined,
         due_time: dueDate?.toISOString() ?? undefined,
         recurrence,
@@ -106,6 +109,13 @@ export default function NewTaskScreen() {
             monthly: t('repeats_monthly'),
             never: '',
           }) || undefined,
+      });
+      await scheduleTaskReminder({
+        id,
+        title: trimmedTitle,
+        due_time: dueDate?.toISOString(),
+        reminder: reminder ?? undefined,
+        done: false,
       });
       router.back();
     } catch {

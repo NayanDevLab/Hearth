@@ -205,6 +205,24 @@ export async function getTaskById(id: string): Promise<Task | null> {
   return row ?? null;
 }
 
+// Returns all incomplete tasks that have both a due time and a reminder set —
+// used to (re)schedule local notifications on app startup.
+export async function getTasksWithReminders(): Promise<Task[]> {
+  const rows = await getDb().getAllAsync<Task>(
+    `SELECT * FROM tasks WHERE done = 0 AND due_time IS NOT NULL AND reminder IS NOT NULL;`
+  );
+  return rows.map((r) => ({ ...r, done: Boolean(r.done) }));
+}
+
+// Returns the ids of every task in a recurring series (including the series root).
+export async function getTaskIdsByRecurrence(recurrenceId: string): Promise<string[]> {
+  const rows = await getDb().getAllAsync<{ id: string }>(
+    `SELECT id FROM tasks WHERE recurrence_id = ? OR id = ?;`,
+    [recurrenceId, recurrenceId]
+  );
+  return rows.map((r) => r.id);
+}
+
 export async function getTaskHistory(taskId: string): Promise<TaskCompletion[]> {
   return getDb().getAllAsync<TaskCompletion>(
     'SELECT * FROM task_completions WHERE task_id = ? ORDER BY completed_at DESC LIMIT 5;',

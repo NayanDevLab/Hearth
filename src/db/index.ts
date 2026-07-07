@@ -13,7 +13,9 @@ import { migrateV7 } from './migrations/v7_locator';
 import { migrateV8 } from './migrations/v8_money';
 import { migrateV9 } from './migrations/v9_maintenance';
 import { migrateV10 } from './migrations/v10_pantry';
-import { DB_VERSION } from './schema';
+import { migrateV11 } from './migrations/v11_meals';
+import { migrateV12 } from './migrations/v12_meals_fix';
+import { DB_VERSION, SQL_TABLES } from './schema';
 
 const DB_NAME = 'hearth.db';
 
@@ -59,6 +61,18 @@ export async function initDb(): Promise<SQLiteDatabase> {
   if (currentVersion < 10) {
     await migrateV10(db);
   }
+  if (currentVersion < 11) {
+    await migrateV11(db);
+  }
+  if (currentVersion < 12) {
+    await migrateV12(db);
+  }
+
+  // Self-healing: guarantee every table in the current schema exists (all
+  // statements are CREATE TABLE IF NOT EXISTS). Dev hot-reloads can stamp
+  // user_version before a freshly added migration is wired in, which would
+  // otherwise leave new tables permanently missing.
+  await db.execAsync(Object.values(SQL_TABLES).join('\n'));
 
   if (currentVersion < DB_VERSION) {
     await db.execAsync(`PRAGMA user_version = ${DB_VERSION};`);

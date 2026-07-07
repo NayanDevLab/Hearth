@@ -13,6 +13,7 @@ import enCommon from './locales/en/common.json';
 import enDashboard from './locales/en/dashboard.json';
 import enLocator from './locales/en/locator.json';
 import enMaintenance from './locales/en/maintenance.json';
+import enMeals from './locales/en/meals.json';
 import enMoney from './locales/en/money.json';
 import enOnboarding from './locales/en/onboarding.json';
 import enPantry from './locales/en/pantry.json';
@@ -25,6 +26,7 @@ import guCommon from './locales/gu/common.json';
 import guDashboard from './locales/gu/dashboard.json';
 import guLocator from './locales/gu/locator.json';
 import guMaintenance from './locales/gu/maintenance.json';
+import guMeals from './locales/gu/meals.json';
 import guMoney from './locales/gu/money.json';
 import guOnboarding from './locales/gu/onboarding.json';
 import guPantry from './locales/gu/pantry.json';
@@ -37,6 +39,7 @@ import hiCommon from './locales/hi/common.json';
 import hiDashboard from './locales/hi/dashboard.json';
 import hiLocator from './locales/hi/locator.json';
 import hiMaintenance from './locales/hi/maintenance.json';
+import hiMeals from './locales/hi/meals.json';
 import hiMoney from './locales/hi/money.json';
 import hiOnboarding from './locales/hi/onboarding.json';
 import hiPantry from './locales/hi/pantry.json';
@@ -82,6 +85,7 @@ export async function initI18n(language: AppLanguage = 'en'): Promise<void> {
       'maintenance',
       'money',
       'pantry',
+      'meals',
     ],
     resources: {
       en: {
@@ -94,6 +98,7 @@ export async function initI18n(language: AppLanguage = 'en'): Promise<void> {
         settings: enSettings,
         locator: enLocator,
         maintenance: enMaintenance,
+        meals: enMeals,
         money: enMoney,
         pantry: enPantry,
       },
@@ -107,6 +112,7 @@ export async function initI18n(language: AppLanguage = 'en'): Promise<void> {
         settings: hiSettings,
         locator: hiLocator,
         maintenance: hiMaintenance,
+        meals: hiMeals,
         money: hiMoney,
         pantry: hiPantry,
       },
@@ -120,6 +126,7 @@ export async function initI18n(language: AppLanguage = 'en'): Promise<void> {
         settings: guSettings,
         locator: guLocator,
         maintenance: guMaintenance,
+        meals: guMeals,
         money: guMoney,
         pantry: guPantry,
       },

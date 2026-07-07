@@ -2,10 +2,15 @@
 // Call setupNotifications() + rescheduleAllTaskReminders() once at app startup,
 // then scheduleTaskReminder()/cancelTaskReminder() whenever a task's
 // title/due_time/reminder/done state changes.
+//
+// expo-notifications is loaded lazily and skipped entirely in Expo Go:
+// since SDK 53 even importing it there throws (push functionality was
+// removed from Expo Go). Reminders are no-ops in Expo Go and work in
+// development/production builds.
 
 import { Platform } from 'react-native';
 
-import * as Notifications from 'expo-notifications';
+import Constants, { ExecutionEnvironment } from 'expo-constants';
 
 import { getTasksWithReminders, type Task } from '@/db/modules/tasks';
 import { i18next } from '@/i18n';
@@ -18,18 +23,34 @@ const REMINDER_OFFSET_MS: Record<string, number> = {
   '1day': 24 * 60 * 60 * 1000,
 };
 
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldPlaySound: true,
-    shouldSetBadge: false,
-    shouldShowBanner: true,
-    shouldShowList: true,
-  }),
-});
+const isExpoGo = Constants.executionEnvironment === ExecutionEnvironment.StoreClient;
+
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+type NotificationsModule = typeof import('expo-notifications');
+
+let _module: NotificationsModule | null = null;
+
+async function getNotifications(): Promise<NotificationsModule | null> {
+  if (isExpoGo) return null;
+  if (!_module) {
+    _module = await import('expo-notifications');
+    _module.setNotificationHandler({
+      handleNotification: async () => ({
+        shouldPlaySound: true,
+        shouldSetBadge: false,
+        shouldShowBanner: true,
+        shouldShowList: true,
+      }),
+    });
+  }
+  return _module;
+}
 
 // Creates the Android notification channel and requests permission to show
 // notifications. Safe to call on every app start — both calls are idempotent.
 export async function setupNotifications(): Promise<void> {
+  const Notifications = await getNotifications();
+  if (!Notifications) return;
   if (Platform.OS === 'android') {
     await Notifications.setNotificationChannelAsync(CHANNEL_ID, {
       name: 'Task reminders',
@@ -53,7 +74,10 @@ type ReminderTask = Pick<Task, 'id' | 'title' | 'due_time' | 'reminder' | 'done'
 // if the task is incomplete, has a due time + reminder offset, and the
 // resulting trigger time is in the future.
 export async function scheduleTaskReminder(task: ReminderTask): Promise<void> {
-  await cancelTaskReminder(task.id);
+  const Notifications = await getNotifications();
+  if (!Notifications) return;
+
+  await Notifications.cancelScheduledNotificationAsync(task.id);
 
   if (task.done || !task.due_time || !task.reminder) return;
   const offset = REMINDER_OFFSET_MS[task.reminder];
@@ -78,6 +102,8 @@ export async function scheduleTaskReminder(task: ReminderTask): Promise<void> {
 }
 
 export async function cancelTaskReminder(taskId: string): Promise<void> {
+  const Notifications = await getNotifications();
+  if (!Notifications) return;
   await Notifications.cancelScheduledNotificationAsync(taskId);
 }
 
@@ -88,6 +114,8 @@ export async function cancelTaskReminders(taskIds: string[]): Promise<void> {
 // Re-syncs every scheduled notification with the current DB state — run once
 // at app startup so reminders survive app restarts and reinstalled builds.
 export async function rescheduleAllTaskReminders(): Promise<void> {
+  const Notifications = await getNotifications();
+  if (!Notifications) return;
   await Notifications.cancelAllScheduledNotificationsAsync();
   const tasks = await getTasksWithReminders();
   await Promise.all(tasks.map(scheduleTaskReminder));

@@ -2,7 +2,7 @@
 // Each module owns its tables; add new tables in the matching section.
 // Bump DB_VERSION and add a migration in migrations/ when changing schema.
 
-export const DB_VERSION = 10;
+export const DB_VERSION = 12;
 
 export const SQL_TABLES = {
   // ─── Tasks ────────────────────────────────────────────────
@@ -170,13 +170,35 @@ export const SQL_TABLES = {
   `,
 
   // ─── Meals ───────────────────────────────────────────────
-  meals: `
-    CREATE TABLE IF NOT EXISTS meals (
+  dishes: `
+    CREATE TABLE IF NOT EXISTS dishes (
       id            TEXT PRIMARY KEY,
       name          TEXT NOT NULL,
-      scheduled_at  TEXT,
-      meal_type     TEXT,
-      duration_min  INTEGER,
+      emoji         TEXT NOT NULL DEFAULT '🍽️',
+      meal_type     TEXT NOT NULL DEFAULT 'dinner',
+      prep_minutes  INTEGER,
+      notes         TEXT,
+      created_at    TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at    TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+  `,
+
+  dish_ingredients: `
+    CREATE TABLE IF NOT EXISTS dish_ingredients (
+      id            TEXT PRIMARY KEY,
+      dish_id       TEXT NOT NULL REFERENCES dishes(id) ON DELETE CASCADE,
+      name          TEXT NOT NULL,
+      qty           REAL NOT NULL DEFAULT 1,
+      unit          TEXT NOT NULL DEFAULT 'ea'
+    );
+  `,
+
+  meal_plan: `
+    CREATE TABLE IF NOT EXISTS meal_plan (
+      id            TEXT PRIMARY KEY,
+      date          TEXT NOT NULL,
+      slot          TEXT NOT NULL DEFAULT 'dinner',
+      dish_id       TEXT NOT NULL REFERENCES dishes(id) ON DELETE CASCADE,
       cook          TEXT,
       notes         TEXT,
       created_at    TEXT NOT NULL DEFAULT (datetime('now'))

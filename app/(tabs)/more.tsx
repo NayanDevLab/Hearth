@@ -119,6 +119,14 @@ export default function MoreScreen() {
             value=""
             subtitle="Track stock, expiry, and low items"
             onPress={() => router.push('/pantry' as never)}
+          />
+          <LibraryRow
+            icon={<Icon.meal size={18} color="#8A6220" />}
+            iconBg={colors.butterSoft}
+            label="Meal Planner"
+            value=""
+            subtitle="Plan weekly meals and dishes"
+            onPress={() => router.push('/meals' as never)}
             isLast
           />
         </LibrarySection>
